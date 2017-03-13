@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
 const Botkit = require('botkit');
 const helpers = require('./lib/helpers');
 
@@ -14,13 +13,17 @@ slothbot.startRTM((err) => {
 });
 
 controller.hears('keywords', ['mention', 'direct_message'], (bot, message) => {
-  helpers.fetchCampaigns('production')
+  bot.reply(message, 'Finding all Gambit campaigns running on production...');
+
+  return helpers.fetchCampaigns('production')
     .then(response => bot.reply(message, response))
     .catch(err => bot.reply(message, err.message));
 });
 
 controller.hears('thor', ['mention', 'direct_message'], (bot, message) => {
-  helpers.fetchCampaigns('thor')
+  bot.reply(message, 'Finding all Gambit campaigns running on Thor...');
+
+  return helpers.fetchCampaigns('thor')
     .then(response => bot.reply(message, response))
     .catch(err => bot.reply(message, err.message));
 });
