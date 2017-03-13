@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run lint",
     "start": "node index",
-    "lint": "eslint --ext=.js index.js"
+    "lint": "eslint --ext=.js index.js lib"
   },
   "author": "DoSomething.org",
   "license": "MIT",
@@ -14,6 +14,7 @@
     "node": ">=6.10.x"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "botkit": "^0.2.2",
     "superagent": "^3.5.0"
   },
