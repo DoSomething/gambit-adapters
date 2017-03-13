@@ -1,16 +1,10 @@
-'use strict';
-
 const Botkit = require('botkit');
+const request = require('superagent');
 
 const controller = Botkit.slackbot();
-const bot = controller.spawn({
-  token: process.env.SLACK_API_TOKEN,
-});
+const slothbot = controller.spawn({ token: process.env.SLACK_API_TOKEN });
 
-const request = require('superagent');
-const gambitBaseUri = 'https://ds-mdata-responder.herokuapp.com/v1/'
-
-bot.startRTM((err, bot, payload) => {
+slothbot.startRTM((err) => {
   if (err) {
     throw new Error('Could not connect to Slack');
   }
@@ -25,21 +19,20 @@ controller.hears('eye', ['mention', 'ambient'], (bot, message) => {
 });
 
 controller.hears('keywords', ['mention', 'direct_message'], (bot, message) => {
-  console.log('keywords');
-  let output = {
+  const output = {
     username: 'Puppet Sloth',
     text: 'Campaigns running on Gambit production:',
     attachments: [],
   };
 
-  const colors = [ 'FCD116', '23b7fb', '4e2b63' ];
+  const colors = ['FCD116', '23b7fb', '4e2b63'];
+  const gambitBaseUri = 'https://ds-mdata-responder.herokuapp.com/v1/';
 
   request.get(`${gambitBaseUri}campaigns`)
     .then((response) => {
       response.body.data.forEach((campaign, index) => {
         const keywords = campaign.keywords.map(entry => entry.keyword);
-
-        const attachment = {
+        output.attachments.push({
           color: `#${colors[index % 3]}`,
           title: `${campaign.title} (ID ${campaign.id})`,
           title_link: `https://dosomething.org/node/${campaign.id}`,
@@ -55,11 +48,10 @@ controller.hears('keywords', ['mention', 'direct_message'], (bot, message) => {
               short: true,
             },
           ],
-        }
-        output.attachments.push(attachment);
+        });
       });
 
       bot.reply(message, output);
     })
-    .catch(err => console.log(err));
+    .catch(err => bot.reply(message, err.message));
 });
