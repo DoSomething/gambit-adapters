@@ -1,16 +1,27 @@
 {
   "name": "slothbot",
   "version": "0.0.0",
-  "description": "",
+  "description": "A DoSomething.org Slackbot for getting causey.",
   "main": "index.js",
   "scripts": {
+    "test": "npm run lint",
     "start": "node index",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint --ext=.js index.js"
   },
-  "author": "",
+  "author": "DoSomething.org",
   "license": "MIT",
+  "engines": {
+    "node": ">=6.10.x"
+  },
   "dependencies": {
     "botkit": "^0.2.2",
     "superagent": "^3.5.0"
+  },
+  "devDependencies": {
+    "@dosomething/eslint-config": "^2.0.0",
+    "eslint": "^3.17.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.0"
   }
 }
