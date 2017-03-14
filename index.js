@@ -12,7 +12,7 @@ slothbot.startRTM((err) => {
   }
 });
 
-controller.hears('keywords', ['mention', 'direct_message'], (bot, message) => {
+controller.hears('keywords', ['direct_mention', 'direct_message'], (bot, message) => {
   bot.reply(message, 'Finding all Gambit campaigns running on production...');
 
   return helpers.fetchCampaigns('production')
@@ -20,7 +20,7 @@ controller.hears('keywords', ['mention', 'direct_message'], (bot, message) => {
     .catch(err => bot.reply(message, err.message));
 });
 
-controller.hears('thor', ['mention', 'direct_message'], (bot, message) => {
+controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) => {
   bot.reply(message, 'Finding all Gambit campaigns running on Thor...');
 
   return helpers.fetchCampaigns('thor')
