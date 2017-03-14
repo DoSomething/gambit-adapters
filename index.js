@@ -27,3 +27,8 @@ controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) =>
     .then(response => bot.reply(message, response))
     .catch(err => bot.reply(message, err.message));
 });
+
+const port = process.env.PORT || 5000;
+controller.setupWebserver(port, (err, server) => {
+  controller.createWebhookEndpoints(server);
+});
