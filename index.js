@@ -2,6 +2,7 @@
 
 const Botkit = require('botkit');
 const helpers = require('./lib/helpers');
+const logger = require('winston');
 
 const controller = Botkit.slackbot({
   clientId: process.env.SLACK_CLIENT_ID,
@@ -18,9 +19,8 @@ slothbot.startRTM((err, bot, payload) => {
   // Save team to get Interactive Messages working.
   // @see https://github.com/howdyai/botkit/issues/108.
   controller.saveTeam(payload.team, () => {
-    console.log('Saved team');
+    logger.info(`Saved team id:${payload.team.id}`);
   });
-
 });
 
 controller.hears('keywords', ['direct_mention', 'direct_message'], (bot, message) => {
@@ -40,7 +40,8 @@ controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) =>
 });
 
 controller.on('interactive_message_callback', (bot, message) => {
-  console.log(message.callback_id);
+  logger.info(`Received interactive_message_callback:${message.callback_id}`);
+
   slothbot.reply(message, `Hi ${message.callback_id}`);
 });
 
