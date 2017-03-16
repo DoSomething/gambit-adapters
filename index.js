@@ -41,8 +41,11 @@ controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) =>
 
 controller.on('interactive_message_callback', (bot, message) => {
   logger.info(`Received interactive_message_callback:${message.callback_id}`);
+  const data = message.callback_id.split('_');
 
-  slothbot.reply(message, `Hi ${message.callback_id}`);
+  return helpers.fetchRenderedCampaignMessages(data[1], data[0])
+    .then(response => slothbot.reply(message, response))
+    .catch(err => slothbot.reply(message, err.message));
 });
 
 const port = process.env.PORT || 5000;
