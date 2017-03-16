@@ -41,6 +41,7 @@ controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) =>
 
 controller.on('interactive_message_callback', (bot, message) => {
   logger.info(`Received interactive_message_callback:${message.callback_id}`);
+  // Our callback_id is defined as environmentName_campaignId, e.g. 'thor_7483'.
   const data = message.callback_id.split('_');
 
   return helpers.fetchRenderedCampaignMessages(data[1], data[0])
