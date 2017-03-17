@@ -3,7 +3,11 @@ Slothbot is an internal DoSomething.org Slack app used for tasks like returning 
 
 The Slothbot is named in honor of the DoSomething Puppet Sloth, who would like to remind you from the grave that he once [interviewed Tyler Oakley](https://youtu.be/wetvnbDB4wg).
 
-Slothbot currently supports 2 commands:
+Commands for mentioning `@slothbot`:
+
+* `help` -- introduction, list direct messages commands
+
+Commands for direct messages to `@slothbot`:
 
 * `keywords` -- returns all production Gambit campaigns and keywords 
 * `thor` -- returns all Thor Gambit campaigns and keywords

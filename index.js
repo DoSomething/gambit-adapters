@@ -23,16 +23,23 @@ slothbot.startRTM((err, bot, payload) => {
   });
 });
 
-controller.hears('keywords', ['direct_mention', 'direct_message'], (bot, message) => {
-  bot.reply(message, 'Finding all Gambit campaigns running on production...');
+controller.hears('help', ['direct_mention', 'direct_message'], (bot, message) => {
+  const helpMsg = 'Hey, it\'s me, Puppet Sloth. I\'ve been resurrected as a bot who knows what ' +
+    'campaigns currently have SMS keywords.\n\nSend me a direct message that says *keywords* to ' +
+    'see what keywords are live. You can also send a DM with *thor* to view our test keywords.';
+  bot.reply(message, helpMsg);
+});
+
+controller.hears('keywords', ['direct_message'], (bot, message) => {
+  bot.reply(message, 'Finding all Gambit Campaigns running on production...');
 
   return helpers.fetchCampaigns('production')
     .then(response => slothbot.reply(message, response))
     .catch(err => slothbot.reply(message, err.message));
 });
 
-controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) => {
-  bot.reply(message, 'Finding all Gambit campaigns running on Thor...');
+controller.hears('thor', ['direct_message'], (bot, message) => {
+  bot.reply(message, 'Finding all Gambit Campaigns running on Thor...');
 
   return helpers.fetchCampaigns('thor')
     .then(response => slothbot.reply(message, response))
@@ -43,8 +50,12 @@ controller.on('interactive_message_callback', (bot, message) => {
   logger.info(`Received interactive_message_callback:${message.callback_id}`);
   // Our callback_id is defined as environmentName_campaignId, e.g. 'thor_7483'.
   const data = message.callback_id.split('_');
+  const campaignId = data[1];
+  const environmentName = data[0];
+  const findingMsg = `Finding all messages for Campaign ${campaignId} on ${environmentName}...`;
+  slothbot.reply(message, findingMsg);
 
-  return helpers.fetchRenderedCampaignMessages(data[1], data[0])
+  return helpers.fetchRenderedCampaignMessages(campaignId, environmentName)
     .then(response => slothbot.reply(message, response))
     .catch(err => slothbot.reply(message, err.message));
 });
