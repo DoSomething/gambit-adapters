@@ -24,7 +24,7 @@ slothbot.startRTM((err, bot, payload) => {
 });
 
 controller.hears('keywords', ['direct_mention', 'direct_message'], (bot, message) => {
-  bot.reply(message, 'Finding all Gambit campaigns running on production...');
+  bot.reply(message, 'Finding all Gambit Campaigns running on production...');
 
   return helpers.fetchCampaigns('production')
     .then(response => slothbot.reply(message, response))
@@ -32,7 +32,7 @@ controller.hears('keywords', ['direct_mention', 'direct_message'], (bot, message
 });
 
 controller.hears('thor', ['direct_mention', 'direct_message'], (bot, message) => {
-  bot.reply(message, 'Finding all Gambit campaigns running on Thor...');
+  bot.reply(message, 'Finding all Gambit Campaigns running on Thor...');
 
   return helpers.fetchCampaigns('thor')
     .then(response => slothbot.reply(message, response))
@@ -43,8 +43,12 @@ controller.on('interactive_message_callback', (bot, message) => {
   logger.info(`Received interactive_message_callback:${message.callback_id}`);
   // Our callback_id is defined as environmentName_campaignId, e.g. 'thor_7483'.
   const data = message.callback_id.split('_');
+  const campaignId = data[1];
+  const environmentName = data[0];
+  const findingMsg = `Finding all messages for Campaign ${campaignId} on ${environmentName}...`;
+  slothbot.reply(message, findingMsg);
 
-  return helpers.fetchRenderedCampaignMessages(data[1], data[0])
+  return helpers.fetchRenderedCampaignMessages(campaignId, environmentName)
     .then(response => slothbot.reply(message, response))
     .catch(err => slothbot.reply(message, err.message));
 });
