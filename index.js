@@ -23,6 +23,13 @@ slothbot.startRTM((err, bot, payload) => {
   });
 });
 
+controller.hears('help', ['direct_mention', 'direct_message'], (bot, message) => {
+  const helpMsg = 'Hey, it\'s me, Puppet Sloth. I\'ve been resurrected as a bot who knows what ' +
+    'campaigns currently have SMS keywords.\n\nSend me a direct message that says *keywords* to ' +
+    'see what keywords are live. You can also send a DM with *thor* to view our test keywords.';
+  bot.reply(message, helpMsg);
+});
+
 controller.hears('keywords', ['direct_message'], (bot, message) => {
   bot.reply(message, 'Finding all Gambit Campaigns running on production...');
 
