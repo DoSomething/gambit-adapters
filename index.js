@@ -1,6 +1,7 @@
 'use strict';
 
 const Botkit = require('botkit');
+const contentful = require('contentful');
 const helpers = require('./lib/helpers');
 const logger = require('winston');
 
@@ -22,6 +23,28 @@ slothbot.startRTM((err, bot, payload) => {
     logger.info(`Saved team id:${payload.team.id}`);
   });
 });
+
+let client;
+try {
+  client = contentful.createClient({
+    space: process.env.CONTENTFUL_SPACE_ID,
+    accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
+  });
+} catch (err) {
+  logger.error(`contentful error:${err.message}`);
+}
+
+client.getEntries({ content_type: 'listener' })
+  .then((response) => {
+    response.items.forEach((listener) => {
+      controller.hears(listener.fields.keywords, listener.fields.events, (bot, message) => {
+        const responseMessages = listener.fields.responseMessages.split('|');
+        const replyMessage = responseMessages[Math.floor(Math.random() * responseMessages.length)];
+        bot.reply(message, replyMessage);
+      });
+    });
+  });
+
 
 controller.hears('help', ['direct_mention', 'direct_message'], (bot, message) => {
   const helpMsg = 'Hey, it\'s me, Puppet Sloth. I\'ve been resurrected as a bot who knows what ' +
