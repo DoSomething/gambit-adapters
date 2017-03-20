@@ -22,7 +22,7 @@ There's a second Slack app, Slothbot Dev, used for developers to work on Slothbo
 
 Install Node, ngrok, and the Heroku toolbelt. 
 
-Next, clone this repository and create a `.env` file with the [Client ID, Client Secret](https://api.slack.com/apps/A4HJDDLUQ/general), and [Bot User Access Token](https://api.slack.com/apps/A4HJDDLUQ/oauth) for our "Slothbot Dev" Slack app. 
+Next, clone this repository and create a `.env` file with the [Client ID, Client Secret](https://api.slack.com/apps/A4HJDDLUQ/general), and [Bot User Access Token](https://api.slack.com/apps/A4HJDDLUQ/oauth) for our "Slothbot Dev" Slack app, and the settings for our the Slothbot Contentful space.
 
 To run Slothbot locally, execute `heroku local` from your Slothbot directory. The `@slothbot-dev` Slack bot user should appear online. Messages received by the `@slothbot-dev` bot will be sent to your local Slothbot instance.
 
