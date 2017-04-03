@@ -38,13 +38,15 @@ client.getEntries({ content_type: 'listener' })
   .then((response) => {
     response.items.forEach((listener) => {
       controller.hears(listener.fields.keywords, listener.fields.events, (bot, message) => {
-        const replyMessages = listener.fields.replyMessages.split('|');
-        const replyMessage = replyMessages[Math.floor(Math.random() * replyMessages.length)];
-        bot.reply(message, replyMessage);
+        const json = listener.fields.replyMessageJson;
+        if (json.messages && json.messages.length > 0) {
+          const replyMessages = json.messages;
+          const replyMessage = json.messages[Math.floor(Math.random() * replyMessages.length)];
+          bot.reply(message, replyMessage);
+        }
       });
     });
   });
-
 
 controller.hears('keywords', ['direct_message'], (bot, message) => {
   bot.reply(message, 'Finding all Gambit Campaigns running on production...');
