@@ -35,3 +35,8 @@ Update the [Slothbot Dev Interactive Messages URL](https://api.slack.com/apps/A4
 <img src="https://cloud.githubusercontent.com/assets/1236811/24002302/9e8ebd0a-0a1d-11e7-9e14-4b9b91ce3d20.png" width="600">
 
 Interactive Messages callbacks (e.g. clicking on a View Messages button in the list of Campaigns) will now be sent to your localhost.
+
+### License
+&copy;2017 DoSomething.org. Gambit is free software, and may be redistributed under the terms specified
+in the [LICENSE](https://github.com/DoSomething/slothbot/blob/master/LICENSE) file. The name and logo for
+DoSomething.org are trademarks of Do Something, Inc and may not be used without permission.
