@@ -1,6 +1,6 @@
 {
   "name": "slothbot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A DoSomething.org Slackbot for getting causey.",
   "engines": {
     "node": ">=6.10.x"
@@ -17,6 +17,7 @@
     "bluebird": "^3.5.0",
     "botkit": "^0.5.2",
     "contentful": "^3.8.1",
+    "dashbot": "^0.8.6",
     "superagent": "^3.5.0",
     "winston": "^2.3.1"
   },

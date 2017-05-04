@@ -2,8 +2,8 @@
 
 const Botkit = require('botkit');
 const contentful = require('contentful');
-const helpers = require('./lib/helpers');
 const logger = require('winston');
+const helpers = require('./lib/helpers');
 
 const controller = Botkit.slackbot({
   clientId: process.env.SLACK_CLIENT_ID,
@@ -11,7 +11,16 @@ const controller = Botkit.slackbot({
   interactive_replies: true,
   scopes: ['bot'],
 });
+
 const slothbot = controller.spawn({ token: process.env.SLACK_API_TOKEN });
+
+const dashbotApikey = process.env.DASHBOT_API_KEY;
+if (dashbotApikey) {
+  const dashbot = require('dashbot')(dashbotApikey).slack; // eslint-disable-line global-require
+
+  controller.middleware.receive.use(dashbot.receive);
+  controller.middleware.send.use(dashbot.send);
+}
 
 slothbot.startRTM((err, bot, payload) => {
   if (err) {
