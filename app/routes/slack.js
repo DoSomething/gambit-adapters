@@ -18,7 +18,7 @@ const web = new WebClient(apiToken);
 rtm.start();
 
 /**
- * Sends the Campaign List Message to given Slack channel for given environmentName.
+ * Sends Campaign List Message to given Slack channel for given environmentName.
  * @param {object} channel
  * @param {string} environmentName
  * @return {Promise}
@@ -29,8 +29,7 @@ function sendCampaignIndexMessageToChannel(channel, environmentName) {
   return gambitCampaigns.index(environmentName)
     .then((response) => {
       const attachments = response.body.data.map((campaign, index) => {
-        const attachment = slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
-        return attachment;
+        return slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
       });
 
       return attachments;
@@ -41,6 +40,30 @@ function sendCampaignIndexMessageToChannel(channel, environmentName) {
       return web.chat.postMessage(channel, text, { attachments });
     })
     .then(() => logger.info(`campaignIndex channel=${channel} environment=${environmentName}`))
+    .catch((err) => {
+      const message = err.message;
+      rtm.sendMessage(message, channel);
+      logger.error(message);
+    });
+}
+
+/**
+ * Sends Campaign Detail Message to given Slack channel for given environmentName and campaignId.
+ * @param {object} channel
+ * @param {string} environmentName
+ * @param {number} campaignId
+ * @return {Promise}
+ */
+function sendCampaignDetailMessageToChannel(channel, environmentName, campaignId) {
+  rtm.sendTyping(channel);
+
+  return gambitCampaigns.get(environmentName, campaignId)
+    .then((response) => {
+      const campaign = response.body.data;
+
+      return web.chat.postMessage(channel, campaign.title);
+    })
+    .then(() => logger.info(`campaignGet channel=${channel} environment=${environmentName}`))
     .catch((err) => {
       const message = err.message;
       rtm.sendMessage(message, channel);
@@ -85,8 +108,10 @@ router.post('/', (req, res) => {
   }
 
   res.status(200).end();
-  const callback = payload.callback_id;
-  return rtm.sendMessage(`You selected ${callback}`, payload.channel.id);
+  const channel = payload.channel.id;
+  const callback = slackHelper.parseCallbackId(payload.callback_id);
+
+  return sendCampaignDetailMessageToChannel(channel, callback.environmentName, callback.campaignId);
 });
 
 module.exports = router;
