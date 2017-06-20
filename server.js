@@ -5,12 +5,23 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 const app = express();
-// parse application/json Content-Type
 app.use(bodyParser.json());
-// parse application/x-www-form-urlencoded Content-Type
 app.use(bodyParser.urlencoded({ extended: true }));
-// require all routes
+
 require('./app/routes')(app);
+
+const WINSTON_LEVEL = process.env.LOGGING_LEVEL || 'info';
+
+const logger = require('winston');
+logger.configure({
+  transports: [
+    new logger.transports.Console({
+      prettyPrint: true,
+      colorize: true,
+      level: WINSTON_LEVEL,
+    }),
+  ],
+});
 
 return app.listen(4000, () => {
   console.log(`Slothbot is here.`);
