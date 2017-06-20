@@ -8,16 +8,18 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run lint",
-    "start": "node index",
-    "lint": "eslint --ext=.js index.js lib"
+    "start": "node server",
+    "lint": "eslint --ext=.js index.js app lib"
   },
   "author": "DoSomething.org",
   "license": "MIT",
   "dependencies": {
+    "@slack/client": "^3.10.0",
     "bluebird": "^3.5.0",
     "botkit": "^0.5.2",
     "contentful": "^3.8.1",
     "dashbot": "^0.8.6",
+    "express": "^4.15.3",
     "superagent": "^3.5.0",
     "winston": "^2.3.1"
   },
