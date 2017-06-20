@@ -30,7 +30,8 @@ function sendCampaignIndexMessageToChannel(channel, environmentName) {
     .then((response) => {
       const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
       const attachments = response.body.data.map((campaign, index) => {
-        return slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
+        const attachment = slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
+        return attachment;
       });
 
       return web.chat.postMessage(channel, text, { attachments });
