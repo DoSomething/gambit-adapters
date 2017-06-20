@@ -2,7 +2,9 @@
 
 const express = require('express');
 const Slack = require('@slack/client');
-const helpers = require('../../lib/helpers');
+const logger = require('winston');
+const gambitCampaigns = require('../../lib/gambit-campaigns');
+const slackHelper = require('../../lib/slack');
 
 const router = express.Router();
 
@@ -15,6 +17,40 @@ const web = new WebClient(apiToken);
 
 rtm.start();
 
+/**
+ * Sends the Campaign List Message to given Slack channel for given environmentName.
+ * @param {object} channel
+ * @param {string} environmentName
+ * @return {Promise}
+ */
+function sendCampaignIndexMessageToChannel(channel, environmentName) {
+  rtm.sendTyping(channel);
+
+  return gambitCampaigns.index(environmentName)
+    .then((response) => {
+      const attachments = response.body.data.map((campaign, index) => {
+        const attachment = slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
+        return attachment;
+      });
+
+      return attachments;
+    })
+    .then((attachments) => {
+      const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
+
+      return web.chat.postMessage(channel, text, { attachments });
+    })
+    .then(() => logger.info(`campaignIndex channel=${channel} environment=${environmentName}`))
+    .catch((err) => {
+      const message = err.message;
+      rtm.sendMessage(message, channel);
+      logger.error(message);
+    });
+}
+
+/**
+ * Handle message events.
+ */
 rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   // Only respond to private messages.
   if (message.channel[0] !== 'D') return null;
@@ -26,17 +62,15 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
 
   const channel = message.channel;
 
-  if (message.text !== 'keywords' && message.text !== 'thor') {
-    return rtm.sendMessage("G'DAY MATE", channel);
+  if (message.text === 'keywords') {
+    return sendCampaignIndexMessageToChannel(channel, 'production');
   }
 
-  rtm.sendTyping(channel);
+  if (message.text === 'thor') {
+    return sendCampaignIndexMessageToChannel(channel, 'thor');
+  }
 
-  return helpers.fetchCampaigns('production')
-    .then((response) => {
-      web.chat.postMessage(channel, 'Production campaigns:', response);
-    })
-    .catch(err => rtm.sendMessage(err.message, channel));
+  return rtm.sendMessage("G'DAY MATE", channel);
 });
 
 /**
