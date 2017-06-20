@@ -60,8 +60,9 @@ function sendCampaignDetailMessageToChannel(channel, environmentName, campaignId
   return gambitCampaigns.get(environmentName, campaignId)
     .then((response) => {
       const campaign = response.body.data;
+      const text = slackHelper.getCampaignDetailText(environmentName, campaign);
 
-      return web.chat.postMessage(channel, campaign.title);
+      return web.chat.postMessage(channel, text);
     })
     .then(() => logger.info(`campaignGet channel=${channel} environment=${environmentName}`))
     .catch((err) => {
@@ -108,10 +109,10 @@ router.post('/', (req, res) => {
   }
 
   res.status(200).end();
-  const channel = payload.channel.id;
-  const callback = slackHelper.parseCallbackId(payload.callback_id);
+  const channelId = payload.channel.id;
+  const data = slackHelper.parseCallbackId(payload.callback_id);
 
-  return sendCampaignDetailMessageToChannel(channel, callback.environmentName, callback.campaignId);
+  return sendCampaignDetailMessageToChannel(channelId, data.environmentName, data.campaignId);
 });
 
 module.exports = router;
