@@ -28,14 +28,10 @@ function sendCampaignIndexMessageToChannel(channel, environmentName) {
 
   return gambitCampaigns.index(environmentName)
     .then((response) => {
+      const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
       const attachments = response.body.data.map((campaign, index) => {
         return slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
       });
-
-      return attachments;
-    })
-    .then((attachments) => {
-      const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
 
       return web.chat.postMessage(channel, text, { attachments });
     })
@@ -61,8 +57,14 @@ function sendCampaignDetailMessageToChannel(channel, environmentName, campaignId
     .then((response) => {
       const campaign = response.body.data;
       const text = slackHelper.getCampaignDetailText(environmentName, campaign);
+      const messageTypes = Object.keys(campaign.messages);
+      const attachments = messageTypes.map((messageType, index) => {
+        const messageData = campaign.messages[messageType];
 
-      return web.chat.postMessage(channel, text);
+        return slackHelper.parseCampaignMessageAsAttachment(messageType, messageData, index);
+      });
+
+      return web.chat.postMessage(channel, text, { attachments });
     })
     .then(() => logger.info(`campaignGet channel=${channel} environment=${environmentName}`))
     .catch((err) => {
