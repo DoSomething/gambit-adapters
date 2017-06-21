@@ -3,6 +3,7 @@
 const Slack = require('@slack/client');
 const logger = require('winston');
 const gambitCampaigns = require('../../lib/gambit-campaigns');
+const gambitConversations = require('../../lib/gambit-conversations');
 const slack = require('../../lib/slack');
 
 const RtmClient = Slack.RtmClient;
@@ -94,6 +95,9 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return exports.sendCampaignIndexMessage(channel, 'thor');
   }
 
-  // TODO: Query the Gambit Conversations API to chat it up!
-  return rtm.sendMessage("G'DAY MATE", channel);
+  const userId = `slack_${message.user}`;
+
+  return gambitConversations.postUserMessage(userId, message.text)
+    .then(reply => rtm.sendMessage(reply, channel))
+    .catch(err => rtm.sendMessage(err.message, channel));
 });
