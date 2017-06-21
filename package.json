@@ -16,6 +16,7 @@
   "dependencies": {
     "@slack/client": "^3.10.0",
     "bluebird": "^3.5.0",
+    "body-parser": "^1.17.2",
     "contentful": "^3.8.1",
     "dashbot": "^0.8.6",
     "express": "^4.15.3",

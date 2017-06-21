@@ -1,104 +1,10 @@
 'use strict';
 
 const express = require('express');
-const Slack = require('@slack/client');
-const logger = require('winston');
-const gambitCampaigns = require('../../lib/gambit-campaigns');
-const slackHelper = require('../../lib/slack');
+const controller = require('../controllers/slack');
+const slack = require('../../lib/slack');
 
 const router = express.Router();
-
-const RtmClient = Slack.RtmClient;
-const WebClient = Slack.WebClient;
-const RTM_EVENTS = Slack.RTM_EVENTS;
-const apiToken = process.env.SLACK_API_TOKEN;
-const rtm = new RtmClient(apiToken);
-const web = new WebClient(apiToken);
-
-rtm.start();
-
-/**
- * Sends Campaign List Message to given Slack channel for given environmentName.
- * @param {object} channel
- * @param {string} environmentName
- * @return {Promise}
- */
-function sendCampaignIndexMessageToChannel(channel, environmentName) {
-  rtm.sendTyping(channel);
-
-  return gambitCampaigns.index(environmentName)
-    .then((response) => {
-      const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
-      const attachments = response.body.data.map((campaign, index) => {
-        const attachment = slackHelper.parseCampaignAsAttachment(environmentName, campaign, index);
-        return attachment;
-      });
-
-      return web.chat.postMessage(channel, text, { attachments });
-    })
-    .then(() => logger.info(`campaignIndex channel=${channel} environment=${environmentName}`))
-    .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error(message);
-    });
-}
-
-/**
- * Sends Campaign Detail Message to given Slack channel for given environmentName and campaignId.
- * @param {object} channel
- * @param {string} environmentName
- * @param {number} campaignId
- * @return {Promise}
- */
-function sendCampaignDetailMessageToChannel(channel, environmentName, campaignId) {
-  rtm.sendTyping(channel);
-
-  return gambitCampaigns.get(environmentName, campaignId)
-    .then((response) => {
-      const campaign = response.body.data;
-      const text = slackHelper.getCampaignDetailText(environmentName, campaign);
-      const messageTypes = Object.keys(campaign.messages);
-      const attachments = messageTypes.map((messageType, index) => {
-        const messageData = campaign.messages[messageType];
-
-        return slackHelper.parseCampaignMessageAsAttachment(messageType, messageData, index);
-      });
-
-      return web.chat.postMessage(channel, text, { attachments });
-    })
-    .then(() => logger.info(`campaignGet channel=${channel} environment=${environmentName}`))
-    .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error(message);
-    });
-}
-
-/**
- * Handle message events.
- */
-rtm.on(RTM_EVENTS.MESSAGE, (message) => {
-  // Only respond to private messages.
-  if (message.channel[0] !== 'D') return null;
-
-  // Don't reply to our sent messages.
-  if (message.reply_to || message.bot_id) {
-    return null;
-  }
-
-  const channel = message.channel;
-
-  if (message.text === 'keywords') {
-    return sendCampaignIndexMessageToChannel(channel, 'production');
-  }
-
-  if (message.text === 'thor') {
-    return sendCampaignIndexMessageToChannel(channel, 'thor');
-  }
-
-  return rtm.sendMessage("G'DAY MATE", channel);
-});
 
 /**
  * Accept interactive messages.
@@ -113,9 +19,9 @@ router.post('/', (req, res) => {
 
   res.status(200).end();
   const channelId = payload.channel.id;
-  const data = slackHelper.parseCallbackId(payload.callback_id);
+  const data = slack.parseCallbackId(payload.callback_id);
 
-  return sendCampaignDetailMessageToChannel(channelId, data.environmentName, data.campaignId);
+  return controller.sendCampaignDetailMessage(channelId, data.environmentName, data.campaignId);
 });
 
 module.exports = router;
