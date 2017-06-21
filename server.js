@@ -23,6 +23,7 @@ logger.configure({
   ],
 });
 
-return app.listen(4000, () => {
-  console.log(`Slothbot is here.`);
+const port = process.env.PORT || 4000;
+return app.listen(port, () => {
+  logger.info(`Slothbot is running on port=${port}.`);
 });
