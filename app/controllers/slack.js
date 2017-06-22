@@ -2,8 +2,8 @@
 
 const Slack = require('@slack/client');
 const logger = require('winston');
-const gambitCampaigns = require('../../lib/gambit-campaigns');
-const gambitConversations = require('../../lib/gambit-conversations');
+const gambitCampaigns = require('../../lib/gambit/campaigns');
+const gambitChatbot = require('../../lib/gambit/chatbot');
 const slack = require('../../lib/slack');
 
 const RtmClient = Slack.RtmClient;
@@ -95,9 +95,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return exports.sendCampaignIndexMessage(channel, 'thor');
   }
 
-  const userId = `slack_${message.user}`;
-
-  return gambitConversations.postUserMessage(userId, message.text)
+  return gambitChatbot.getReply(message.user, message.text, 'slack')
     .then(reply => rtm.sendMessage(reply, channel))
     .catch(err => rtm.sendMessage(err.message, channel));
 });
