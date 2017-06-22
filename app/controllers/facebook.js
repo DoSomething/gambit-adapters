@@ -2,7 +2,7 @@
 
 const FB = require('fb');
 const logger = require('winston');
-const gambitConversations = require('../../lib/gambit-conversations');
+const gambitChatbot = require('../../lib/gambit/chatbot');
 
 FB.setAccessToken(process.env.FB_PAGE_ACCESS_TOKEN);
 
@@ -52,7 +52,7 @@ module.exports.receivedMessage = function (event) {
   const messageText = message.text;
 
   if (messageText) {
-    gambitConversations.getReply(userId, messageText, 'facebook')
+    gambitChatbot.getReply(userId, messageText, 'facebook')
       .then((gambitReplyText) => {
         const replyPayload = formatPayload(userId, gambitReplyText);
 
