@@ -95,9 +95,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return exports.sendCampaignIndexMessage(channel, 'thor');
   }
 
-  const userId = `slack_${message.user}`;
-
-  return gambitConversations.postUserMessage(userId, message.text)
+  return gambitConversations.getReply(message.user, message.text, 'slack')
     .then(reply => rtm.sendMessage(reply, channel))
     .catch(err => rtm.sendMessage(err.message, channel));
 });

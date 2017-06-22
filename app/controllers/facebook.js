@@ -52,7 +52,7 @@ module.exports.receivedMessage = function (event) {
   const messageText = message.text;
 
   if (messageText) {
-    gambitConversations.postUserMessage(userId, messageText)
+    gambitConversations.getReply(userId, messageText, 'facebook')
       .then((gambitReplyText) => {
         const replyPayload = formatPayload(userId, gambitReplyText);
 
