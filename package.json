@@ -1,7 +1,7 @@
 {
   "name": "slothbot",
-  "version": "1.3.2",
-  "description": "A DoSomething.org Slackbot for getting causey.",
+  "version": "1.4.0",
+  "description": "Let's get causey",
   "engines": {
     "node": ">=6.10.x"
   },
