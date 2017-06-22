@@ -1,7 +1,7 @@
 {
   "name": "slothbot",
-  "version": "1.4.0",
-  "description": "Let's get causey",
+  "version": "1.4.1",
+  "description": "lets get causey",
   "engines": {
     "node": ">=6.10.x"
   },
