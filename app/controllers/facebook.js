@@ -7,29 +7,12 @@ const gambitChatbot = require('../../lib/gambit/chatbot');
 FB.setAccessToken(process.env.FB_PAGE_ACCESS_TOKEN);
 
 /**
- * @param {object} messageData
- * @param {string} messageText
- */
-function postFacebookMessage(messageData) {
-  logger.debug(`facebook.postFacebookMessage:${JSON.stringify(messageData)}`);
-
-  FB.api('me/messages', 'post', messageData, (res) => {
-    if (!res || res.error) {
-      logger.error(!res ? 'error occurred' : res.error);
-      return;
-    }
-
-    logger.debug(res);
-  });
-}
-
-/**
  * @param {string} recipientId
  * @param {string} messageText
  * @return {object}
  */
 function formatPayload(recipientId, messageText) {
-  const messageData = {
+  const data = {
     recipient: {
       id: recipientId,
     },
@@ -38,7 +21,24 @@ function formatPayload(recipientId, messageText) {
     },
   };
 
-  return messageData;
+  return data;
+}
+
+/**
+ * @param {object} messageData
+ * @param {string} messageText
+ */
+function postFacebookMessage(recipientId, messageText) {
+  const data = formatPayload(recipientId, messageText);
+
+  FB.api('me/messages', 'post', data, (res) => {
+    if (!res || res.error) {
+      logger.error(!res ? 'error occurred' : res.error);
+      return;
+    }
+
+    logger.debug(res);
+  });
 }
 
 /**
@@ -53,15 +53,11 @@ module.exports.receivedMessage = function (event) {
 
   if (messageText) {
     gambitChatbot.getReply(userId, messageText, 'facebook')
-      .then((gambitReplyText) => {
-        const replyPayload = formatPayload(userId, gambitReplyText);
+      .then((reply) => {
+        if (!reply.text) return true;
 
-        return postFacebookMessage(replyPayload);
+        return postFacebookMessage(userId, reply.text);
       })
-      .catch((err) => {
-        const replyPayload = formatPayload(userId, err.message);
-
-        return postFacebookMessage(replyPayload);
-      });
+      .catch(err => postFacebookMessage(userId, err.message));
   }
 };
