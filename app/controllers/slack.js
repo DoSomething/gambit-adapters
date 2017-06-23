@@ -96,6 +96,11 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   }
 
   return gambitChatbot.getReply(message.user, message.text, 'slack')
-    .then(reply => rtm.sendMessage(reply, channel))
+    .then((reply) => {
+      // We can sometimes get the silent treatment (e.g. in the Crisis Inbox).
+      if (!reply.text) return true;
+
+      return rtm.sendMessage(reply.text, channel);
+    })
     .catch(err => rtm.sendMessage(err.message, channel));
 });
