@@ -29,7 +29,7 @@ function postFacebookMessage(messageData) {
  * @return {object}
  */
 function formatPayload(recipientId, messageText) {
-  const messageData = {
+  const data = {
     recipient: {
       id: recipientId,
     },
@@ -38,7 +38,7 @@ function formatPayload(recipientId, messageText) {
     },
   };
 
-  return messageData;
+  return data;
 }
 
 /**
@@ -53,15 +53,17 @@ module.exports.receivedMessage = function (event) {
 
   if (messageText) {
     gambitChatbot.getReply(userId, messageText, 'facebook')
-      .then((gambitReplyText) => {
-        const replyPayload = formatPayload(userId, gambitReplyText);
+      .then((reply) => {
+        if (!reply.text) return true;
 
-        return postFacebookMessage(replyPayload);
+        const data = formatPayload(userId, reply.text);
+
+        return postFacebookMessage(data);
       })
       .catch((err) => {
-        const replyPayload = formatPayload(userId, err.message);
+        const data = formatPayload(userId, err.message);
 
-        return postFacebookMessage(replyPayload);
+        return postFacebookMessage(data);
       });
   }
 };
