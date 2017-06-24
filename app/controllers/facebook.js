@@ -1,7 +1,7 @@
 'use strict';
 
 const FB = require('fb');
-const logger = require('winston');
+const logger = require('heroku-logger');
 const gambitChatbot = require('../../lib/gambit/chatbot');
 
 FB.setAccessToken(process.env.FB_PAGE_ACCESS_TOKEN);
