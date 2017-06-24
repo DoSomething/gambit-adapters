@@ -2,7 +2,7 @@
 
 const homeRoute = require('./home');
 const facebookRoute = require('./facebook');
-const slackRoute = require('./slack')
+const slackRoute = require('./slack');
 const twilioRoute = require('./twilio');
 
 module.exports = function init(app) {
