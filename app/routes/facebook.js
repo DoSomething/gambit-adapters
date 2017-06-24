@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const logger = require('winston');
+const logger = require('heroku-logger');
 const controller = require('../controllers/facebook');
 
 const router = express.Router();

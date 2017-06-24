@@ -21,8 +21,9 @@
     "dashbot": "^0.8.6",
     "express": "^4.15.3",
     "fb": "^2.0.0",
+    "heroku-logger": "^0.1.1",
     "superagent": "^3.5.0",
-    "winston": "^2.3.1"
+    "twilio": "^3.4.0"
   },
   "devDependencies": {
     "@dosomething/eslint-config": "^2.0.0",

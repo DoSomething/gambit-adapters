@@ -1,7 +1,7 @@
 'use strict';
 
 const Slack = require('@slack/client');
-const logger = require('winston');
+const logger = require('heroku-logger');
 const gambitCampaigns = require('../../lib/gambit/campaigns');
 const gambitChatbot = require('../../lib/gambit/chatbot');
 const slack = require('../../lib/slack');
