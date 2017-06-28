@@ -13,7 +13,8 @@ const router = express.Router();
 router.use('/', (req, res, next) => {
   req.userId = req.body.From;
   req.text = req.body.Body;
-  logger.debug('twilio req.body', req.body);
+  req.mediaUrl = req.body.MediaUrl0;
+  logger.debug('twilio message received', req.body);
 
   return next();
 });
@@ -22,7 +23,7 @@ router.use('/', (req, res, next) => {
  * Get chatbot reply.
  */
 router.use('/', (req, res, next) => {
-  chatbot.getReply(req.userId, req.text, 'twilio')
+  chatbot.getReply(req.userId, req.text, req.mediaUrl, 'twilio')
     .then((reply) => {
       req.replyText = reply.text;
       return next();

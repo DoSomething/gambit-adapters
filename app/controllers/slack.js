@@ -85,6 +85,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return null;
   }
 
+  logger.debug('slack message received', message);
   const channel = message.channel;
 
   if (message.text === 'keywords') {
@@ -95,7 +96,14 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return exports.sendCampaignIndexMessage(channel, 'thor');
   }
 
-  return gambitChatbot.getReply(message.user, message.text, 'slack')
+  let mediaUrl = null;
+  // Hack to upload images (when an image is shared over DM, it's private in Slack).
+  if (message.text === 'photo') {
+    // TODO: Allow pasting image URL.
+    mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
+  }
+
+  return gambitChatbot.getReply(message.user, message.text, mediaUrl, 'slack')
     .then((reply) => {
       // We can sometimes get the silent treatment (e.g. in the Crisis Inbox).
       if (!reply.text) return true;
