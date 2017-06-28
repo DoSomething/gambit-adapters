@@ -25,7 +25,7 @@ router.use('/', (req, res, next) => {
  */
 router.use('/', (req, res, next) => {
   const redirectUrl = req.body.MediaUrl0;
-  if (redirectUrl) {
+  if (!redirectUrl) {
     return next();
   }
 
@@ -47,6 +47,7 @@ router.use('/', (req, res, next) => {
       return next();
     })
     .then((err) => {
+      logger.error(err);
       req.replyText = err.message;
       return next();
     });
