@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const request = require('request');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const logger = require('heroku-logger');
 const chatbot = require('../../lib/gambit/chatbot');
@@ -13,10 +14,27 @@ const router = express.Router();
 router.use('/', (req, res, next) => {
   req.userId = req.body.From;
   req.text = req.body.Body;
-  req.mediaUrl = req.body.MediaUrl0;
+
   logger.debug('twilio message received', req.body);
 
   return next();
+});
+
+/**
+ * Find URL of incoming attachment if exists.
+ */
+router.use('/', (req, res, next) => {
+  const redirectUrl = req.body.MediaUrl0;
+  if (redirectUrl) {
+    return next();
+  }
+
+  request.get(redirectUrl, (err, res) => {
+    const url = res.request.uri.href;
+    req.mediaUrl = url;
+
+    return next();
+  });
 });
 
 /**
