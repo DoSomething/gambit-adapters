@@ -87,25 +87,27 @@ module.exports.postCampaignDetailMessage = function (channel, environmentName, c
     });
 };
 
+/**
+ * Posts given messageText to given Slack channel.
+ * @param {string} channel
+ * @param {string} messageText
+ */
 function postMessage(channel, messageText) {
   web.chat.postMessage(channel, messageText);
 }
 
+/**
+ * Posts Slack message for a given Slothie Action.
+ */
 module.exports.postMessageForAction = function (action) {
-  const user = action.data.user;
-  const userId = user._id;
-
-  let text = `User ${userId} cancelled their support request.`;
-  if (user.paused) {
-    let topic = 'Support: Help';
-    if (user.topic === 'topic_support_crisis') {
-      topic = ' Support: Crisis';
-    }
-    text = `*${topic}* flagged message from User ${userId}.`;
+  if (action.type !== 'updateUserPaused') {
+    return;
   }
 
-  postMessage(process.env.SLACK_ALERT_CHANNEL, text);
+  const messageText = slack.parseUpdateUserPausedActionAsText(action);
+  postMessage(process.env.SLACK_ALERT_CHANNEL, messageText);
 };
+
 
 /**
  * Handle message events.
