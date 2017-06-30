@@ -121,19 +121,20 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
 
   logger.debug('slack message received', message);
   const channel = message.channel;
+  const keyword = message.text.toLowerCase().trim();
 
-  if (message.text === 'keywords') {
+  if (keyword === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
 
-  if (message.text === 'thor') {
+  if (keyword === 'thor') {
     return postCampaignIndexMessage(channel, 'thor');
   }
 
   dashbot.logIncoming(bot, team, message);
   let mediaUrl = null;
   // Hack to upload images (when an image is shared over DM, it's private in Slack).
-  if (message.text === 'photo') {
+  if (keyword === 'photo') {
     // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
