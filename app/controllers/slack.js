@@ -2,18 +2,32 @@
 
 const Slack = require('@slack/client');
 const logger = require('heroku-logger');
+
 const gambitCampaigns = require('../../lib/gambit/campaigns');
 const gambitChatbot = require('../../lib/gambit/chatbot');
 const slack = require('../../lib/slack');
+const dashbot = require('dashbot')(process.env.DASHBOT_API_KEY).slack;
 
 const RtmClient = Slack.RtmClient;
 const WebClient = Slack.WebClient;
 const RTM_EVENTS = Slack.RTM_EVENTS;
+const CLIENT_EVENTS = Slack.CLIENT_EVENTS;
+
 const apiToken = process.env.SLACK_API_TOKEN;
 const rtm = new RtmClient(apiToken);
 const web = new WebClient(apiToken);
+let bot;
+let team;
 
 rtm.start();
+
+rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
+  logger.info('Slothbot Slack authenticated.');
+
+  dashbot.logConnect(response);
+  bot = response.self;
+  team = response.team;
+});
 
 /**
  * Sends Campaign List Message to given Slack channel for given environmentName.
@@ -73,6 +87,26 @@ module.exports.sendCampaignDetailMessage = function (channel, environmentName, c
     });
 };
 
+function postMessage(channel, messageText) {
+  web.chat.postMessage(channel, messageText);
+}
+
+module.exports.postMessageForAction = function (action) {
+  const user = action.data.user;
+  const userId = user._id;
+
+  let text = `User ${userId} cancelled their support request.`;
+  if (user.paused) {
+    let topic = 'Support: Help';
+    if (user.topic === 'topic_support_crisis') {
+      topic = ' Support: Crisis';
+    }
+    text = `*${topic}* flagged message from User ${userId}.`;
+  }
+
+  postMessage(process.env.SLACK_ALERT_CHANNEL, text);
+};
+
 /**
  * Handle message events.
  */
@@ -96,6 +130,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return exports.sendCampaignIndexMessage(channel, 'thor');
   }
 
+  dashbot.logIncoming(bot, team, message.text);
   let mediaUrl = null;
   // Hack to upload images (when an image is shared over DM, it's private in Slack).
   if (message.text === 'photo') {
@@ -107,6 +142,8 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     .then((reply) => {
       // We can sometimes get the silent treatment (e.g. in the Crisis Inbox).
       if (!reply.text) return true;
+
+      dashbot.logOutgoing(bot, team, reply.text);
 
       return rtm.sendMessage(reply.text, channel);
     })

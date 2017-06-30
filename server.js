@@ -26,4 +26,7 @@ logger.configure({
 const port = process.env.PORT || 4000;
 return app.listen(port, () => {
   logger.info(`Slothbot is running on port=${port}.`);
+  const events = require('./lib/events');
+
+  setInterval(events.pollActions, process.env.ACTIONS_POLLING_INTERVAL || 3000);
 });

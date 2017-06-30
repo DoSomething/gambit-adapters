@@ -23,19 +23,21 @@ router.use('/', (req, res, next) => {
 /**
  * Find URL of incoming attachment if exists.
  */
+ /* eslint-disable consistent-return */
 router.use('/', (req, res, next) => {
   const redirectUrl = req.body.MediaUrl0;
   if (!redirectUrl) {
     return next();
   }
 
-  request.get(redirectUrl, (err, res) => {
-    const url = res.request.uri.href;
+  request.get(redirectUrl, (err, redirectRes) => {
+    const url = redirectRes.request.uri.href;
     req.mediaUrl = url;
 
     return next();
   });
 });
+ /* eslint-enable consistent-return */
 
 /**
  * Get chatbot reply.
