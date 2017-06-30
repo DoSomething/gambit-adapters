@@ -94,7 +94,7 @@ module.exports.postMessageForAction = function (action) {
     if (user.topic === 'topic_support_crisis') {
       topic = ' Support: Crisis';
     }
-    text = `Message flagged in ${topic} queue for User ${userId}.`;
+    text = `*${topic}* flagged message from User ${userId}.`;
   }
 
   postMessage(process.env.SLACK_ALERT_CHANNEL, text);
