@@ -30,12 +30,12 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
 });
 
 /**
- * Sends Campaign List Message to given Slack channel for given environmentName.
+ * Posts Campaign List Message to given Slack channel for given environmentName.
  * @param {object} channel
  * @param {string} environmentName
  * @return {Promise}
  */
-module.exports.sendCampaignIndexMessage = function (channel, environmentName) {
+function postCampaignIndexMessage(channel, environmentName) {
   rtm.sendTyping(channel);
 
   return gambitCampaigns.index(environmentName)
@@ -48,22 +48,22 @@ module.exports.sendCampaignIndexMessage = function (channel, environmentName) {
 
       return web.chat.postMessage(channel, text, { attachments });
     })
-    .then(() => logger.info(`campaignIndex channel=${channel} environment=${environmentName}`))
+    .then(() => logger.debug('postCampaignIndexMessage', { channel, environmentName }))
     .catch((err) => {
       const message = err.message;
       rtm.sendMessage(message, channel);
-      logger.error(message);
+      logger.error('postCampaignIndexMessage', err);
     });
-};
+}
 
 /**
- * Sends Campaign Detail Message to given Slack channel for given environmentName and campaignId.
+ * Posts Campaign Detail Message to given Slack channel for given environmentName and campaignId.
  * @param {object} channel
  * @param {string} environmentName
  * @param {number} campaignId
  * @return {Promise}
  */
-module.exports.sendCampaignDetailMessage = function (channel, environmentName, campaignId) {
+module.exports.postCampaignDetailMessage = function (channel, environmentName, campaignId) {
   rtm.sendTyping(channel);
 
   return gambitCampaigns.get(environmentName, campaignId)
@@ -79,7 +79,7 @@ module.exports.sendCampaignDetailMessage = function (channel, environmentName, c
 
       return web.chat.postMessage(channel, text, { attachments });
     })
-    .then(() => logger.info(`campaignGet channel=${channel} environment=${environmentName}`))
+    .then(() => logger.debug(`campaignGet channel=${channel} environment=${environmentName}`))
     .catch((err) => {
       const message = err.message;
       rtm.sendMessage(message, channel);
@@ -87,25 +87,27 @@ module.exports.sendCampaignDetailMessage = function (channel, environmentName, c
     });
 };
 
+/**
+ * Posts given messageText to given Slack channel.
+ * @param {string} channel
+ * @param {string} messageText
+ */
 function postMessage(channel, messageText) {
   web.chat.postMessage(channel, messageText);
 }
 
+/**
+ * Posts Slack message for a given Slothie Action.
+ */
 module.exports.postMessageForAction = function (action) {
-  const user = action.data.user;
-  const userId = user._id;
-
-  let text = `User ${userId} cancelled their support request.`;
-  if (user.paused) {
-    let topic = 'Support: Help';
-    if (user.topic === 'topic_support_crisis') {
-      topic = ' Support: Crisis';
-    }
-    text = `*${topic}* flagged message from User ${userId}.`;
+  if (action.type !== 'updateUserPaused') {
+    return;
   }
 
-  postMessage(process.env.SLACK_ALERT_CHANNEL, text);
+  const messageText = slack.parseUpdateUserPausedActionAsText(action);
+  postMessage(process.env.SLACK_ALERT_CHANNEL, messageText);
 };
+
 
 /**
  * Handle message events.
@@ -121,19 +123,20 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
 
   logger.debug('slack message received', message);
   const channel = message.channel;
+  const keyword = message.text.toLowerCase().trim();
 
-  if (message.text === 'keywords') {
-    return exports.sendCampaignIndexMessage(channel, 'production');
+  if (keyword === 'keywords') {
+    return postCampaignIndexMessage(channel, 'production');
   }
 
-  if (message.text === 'thor') {
-    return exports.sendCampaignIndexMessage(channel, 'thor');
+  if (keyword === 'thor') {
+    return postCampaignIndexMessage(channel, 'thor');
   }
 
-  dashbot.logIncoming(bot, team, message.text);
+  dashbot.logIncoming(bot, team, message);
   let mediaUrl = null;
   // Hack to upload images (when an image is shared over DM, it's private in Slack).
-  if (message.text === 'photo') {
+  if (keyword === 'photo') {
     // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
@@ -143,7 +146,13 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
       // We can sometimes get the silent treatment (e.g. in the Crisis Inbox).
       if (!reply.text) return true;
 
-      dashbot.logOutgoing(bot, team, reply.text);
+      // @see https://www.dashbot.io/sdk/slack
+      const dashbotPayload = {
+        type: 'message',
+        text: reply.text,
+        channel,
+      };
+      dashbot.logOutgoing(bot, team, dashbotPayload);
 
       return rtm.sendMessage(reply.text, channel);
     })

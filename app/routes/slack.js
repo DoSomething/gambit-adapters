@@ -21,7 +21,7 @@ router.post('/', (req, res) => {
   const channelId = payload.channel.id;
   const data = slack.parseCallbackId(payload.callback_id);
 
-  return controller.sendCampaignDetailMessage(channelId, data.environmentName, data.campaignId);
+  return controller.postCampaignDetailMessage(channelId, data.environmentName, data.campaignId);
 });
 
 module.exports = router;
