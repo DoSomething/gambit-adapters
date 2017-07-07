@@ -52,7 +52,8 @@ module.exports.receivedMessage = function (event) {
   const messageText = message.text;
 
   if (messageText) {
-    gambitChatbot.getReply(userId, messageText, 'facebook')
+    // TODO: Pass mediaUrl instead of null.
+    gambitChatbot.getReply(userId, messageText, null, 'facebook')
       .then((reply) => {
         if (!reply.text) return true;
 
