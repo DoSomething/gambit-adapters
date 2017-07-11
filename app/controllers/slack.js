@@ -92,8 +92,8 @@ module.exports.postCampaignDetailMessage = function (channel, environmentName, c
  * @param {string} channel
  * @param {string} messageText
  */
-function postMessage(channel, messageText) {
-  web.chat.postMessage(channel, messageText);
+function postMessage(channel, messageText, args) {
+  web.chat.postMessage(channel, messageText, args);
 }
 
 /**
@@ -104,8 +104,8 @@ module.exports.postMessageForAction = function (action) {
     return;
   }
 
-  const messageText = slack.parseUpdateUserPausedActionAsText(action);
-  postMessage(process.env.SLACK_ALERT_CHANNEL, messageText);
+  const message = slack.parseUpdateUserPausedActionAsMessage(action);
+  postMessage(process.env.SLACK_ALERT_CHANNEL, message.text, { attachments: message.attachments });
 };
 
 
