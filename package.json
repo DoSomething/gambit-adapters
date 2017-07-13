@@ -3,7 +3,7 @@
   "version": "1.7.3",
   "description": "lets get causey",
   "engines": {
-    "node": ">=6.10.x"
+    "node": ">=6.11.1"
   },
   "main": "index.js",
   "scripts": {
