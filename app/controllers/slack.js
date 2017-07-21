@@ -4,9 +4,8 @@ const Slack = require('@slack/client');
 const logger = require('heroku-logger');
 
 const gambitCampaigns = require('../../lib/gambit/campaigns');
-const gambitChatbot = require('../../lib/gambit/chatbot');
+const gambitConversations = require('../../lib/gambit/conversations');
 const slack = require('../../lib/slack');
-const dashbot = require('dashbot')(process.env.DASHBOT_API_KEY).slack;
 
 const RtmClient = Slack.RtmClient;
 const WebClient = Slack.WebClient;
@@ -22,11 +21,9 @@ let team;
 rtm.start();
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
-  logger.info('Slothbot Slack authenticated.');
-
-  dashbot.logConnect(response);
-  bot = response.self;
-  team = response.team;
+  bot = response.self.name;
+  team = response.team.name;
+  logger.info('Slothbot Slack authenticated.', { bot, team });
 });
 
 /**
@@ -123,38 +120,32 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
 
   logger.debug('slack message received', message);
   const channel = message.channel;
-  const keyword = message.text.toLowerCase().trim();
+  let command;
+  if (message.text) {
+    command = message.text.toLowerCase().trim();
+  }
 
-  if (keyword === 'keywords') {
+  if (command === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
 
-  if (keyword === 'thor') {
+  if (command === 'thor') {
     return postCampaignIndexMessage(channel, 'thor');
   }
 
-  dashbot.logIncoming(bot, team, message);
   let mediaUrl = null;
   // Hack to upload images (when an image is shared over DM, it's private in Slack).
-  if (keyword === 'photo') {
+  if (command === 'photo') {
     // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
 
-  return gambitChatbot.getReply(message.user, message.text, mediaUrl, 'slack')
-    .then((reply) => {
-      // We can sometimes get the silent treatment (e.g. in the Crisis Inbox).
-      if (!reply.text) return true;
+  const conversation = {
+    slackId: message.user,
+    slackChannel: message.channel,
+  };
 
-      // @see https://www.dashbot.io/sdk/slack
-      const dashbotPayload = {
-        type: 'message',
-        text: reply.text,
-        channel,
-      };
-      dashbot.logOutgoing(bot, team, dashbotPayload);
-
-      return rtm.sendMessage(reply.text, channel);
-    })
+  return gambitConversations.postMessage(conversation, message.text, mediaUrl, 'slack')
+    .then(res => logger.debug('gambitChatbot.postMessage success', res))
     .catch(err => rtm.sendMessage(err.message, channel));
 });

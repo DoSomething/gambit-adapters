@@ -2,7 +2,7 @@
 
 const FB = require('fb');
 const logger = require('heroku-logger');
-const gambitChatbot = require('../../lib/gambit/chatbot');
+const gambitConversations = require('../../lib/gambit/conversations');
 
 FB.setAccessToken(process.env.FB_PAGE_ACCESS_TOKEN);
 
@@ -53,7 +53,7 @@ module.exports.receivedMessage = function (event) {
 
   if (messageText) {
     // TODO: Pass mediaUrl instead of null.
-    gambitChatbot.getReply(userId, messageText, null, 'facebook')
+    gambitConversations.getReply(userId, messageText, null, 'facebook')
       .then((reply) => {
         if (!reply.text) return true;
 

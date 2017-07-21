@@ -2,9 +2,8 @@
 
 const express = require('express');
 const request = require('request');
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const logger = require('heroku-logger');
-const chatbot = require('../../lib/gambit/chatbot');
+const gambitConversations = require('../../lib/gambit/conversations');
 
 const router = express.Router();
 
@@ -43,7 +42,7 @@ router.use('/', (req, res, next) => {
  * Get chatbot reply.
  */
 router.use('/', (req, res, next) => {
-  chatbot.getReply(req.userId, req.text, req.mediaUrl, 'twilio')
+  gambitConversations.postMessage(req.userId, req.text, req.mediaUrl, 'twilio')
     .then((reply) => {
       req.replyText = reply.text;
       return next();
@@ -53,18 +52,6 @@ router.use('/', (req, res, next) => {
       req.replyText = err.message;
       return next();
     });
-});
-
-/**
- * Send Twilio response.
- */
-router.post('/', (req, res) => {
-  if (!req.replyText) return res.send();
-
-  const twiml = new MessagingResponse();
-  twiml.message(req.replyText);
-  res.writeHead(200, { 'Content-Type': 'text/xml' });
-  return res.end(twiml.toString());
 });
 
 module.exports = router;
