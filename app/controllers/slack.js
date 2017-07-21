@@ -145,7 +145,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     slackChannel: message.channel,
   };
 
-  return gambitConversations.postMessage(conversation, message.text, mediaUrl, 'slack')
+  return gambitConversations.postMessage(conversation, message.text, mediaUrl)
     .then(res => logger.debug('gambitChatbot.postMessage success', res))
     .catch(err => rtm.sendMessage(err.message, channel));
 });
