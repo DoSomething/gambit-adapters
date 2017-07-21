@@ -11,10 +11,12 @@ const router = express.Router();
  * Find userId and incoming text.
  */
 router.use('/', (req, res, next) => {
-  req.userId = req.body.From;
-  req.text = req.body.Body;
-
   logger.debug('twilio message received', req.body);
+
+  req.message = {
+    phone: req.body.From,
+    text: req.body.Body,
+  };
 
   return next();
 });
@@ -31,7 +33,7 @@ router.use('/', (req, res, next) => {
 
   request.get(redirectUrl, (err, redirectRes) => {
     const url = redirectRes.request.uri.href;
-    req.mediaUrl = url;
+    req.message.mediaUrl = url;
 
     return next();
   });
@@ -39,19 +41,23 @@ router.use('/', (req, res, next) => {
  /* eslint-enable consistent-return */
 
 /**
- * Get chatbot reply.
+ * Post message to Gambit.
  */
 router.use('/', (req, res, next) => {
-  gambitConversations.postMessage(req.userId, req.text, req.mediaUrl, 'twilio')
+  gambitConversations.postMessage(req.message)
     .then((reply) => {
-      req.replyText = reply.text;
+      req.gambitReply = reply;
       return next();
     })
     .then((err) => {
       logger.error(err);
-      req.replyText = err.message;
+      req.gambitReply = err;
       return next();
     });
+});
+
+router.use('/', (req, res) => {
+  res.send(req.gambitReply);
 });
 
 module.exports = router;

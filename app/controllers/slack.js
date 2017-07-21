@@ -140,12 +140,14 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
 
-  const conversation = {
+  const data = {
     slackId: message.user,
     slackChannel: message.channel,
+    text: message.text,
+    mediaUrl,
   };
 
-  return gambitConversations.postMessage(conversation, message.text, mediaUrl)
+  return gambitConversations.postMessage(data)
     .then(res => logger.debug('gambitChatbot.postMessage success', res))
     .catch(err => rtm.sendMessage(err.message, channel));
 });
