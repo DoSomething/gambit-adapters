@@ -47,18 +47,14 @@ function postFacebookMessage(recipientId, messageText) {
 module.exports.receivedMessage = function (event) {
   logger.debug(`facebook.receivedMessage:${JSON.stringify(event)}`);
 
-  const userId = event.sender.id;
-  const message = event.message;
-  const messageText = message.text;
+  if (! (event.message && event.message.text)) return;
 
-  if (messageText) {
-    // TODO: Pass mediaUrl instead of null.
-    gambitConversations.getReply(userId, messageText, null, 'facebook')
-      .then((reply) => {
-        if (!reply.text) return true;
+  const data = {
+    facebookId: event.sender.id,
+    text: event.message.text,
+  };
 
-        return postFacebookMessage(userId, reply.text);
-      })
-      .catch(err => postFacebookMessage(userId, err.message));
-  }
+  return gambitConversations.postMessage(data)
+    .then(res => logger.debug('gambitChatbot.postMessage success', res))
+    .catch(err => postFacebookMessage(facebookId, err.message));
 };
