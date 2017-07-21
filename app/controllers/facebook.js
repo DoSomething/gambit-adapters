@@ -2,44 +2,9 @@
 
 const FB = require('fb');
 const logger = require('heroku-logger');
-const gambitChatbot = require('../../lib/gambit/chatbot');
+const gambitConversations = require('../../lib/gambit/conversations');
 
 FB.setAccessToken(process.env.FB_PAGE_ACCESS_TOKEN);
-
-/**
- * @param {string} recipientId
- * @param {string} messageText
- * @return {object}
- */
-function formatPayload(recipientId, messageText) {
-  const data = {
-    recipient: {
-      id: recipientId,
-    },
-    message: {
-      text: messageText,
-    },
-  };
-
-  return data;
-}
-
-/**
- * @param {object} messageData
- * @param {string} messageText
- */
-function postFacebookMessage(recipientId, messageText) {
-  const data = formatPayload(recipientId, messageText);
-
-  FB.api('me/messages', 'post', data, (res) => {
-    if (!res || res.error) {
-      logger.error(!res ? 'error occurred' : res.error);
-      return;
-    }
-
-    logger.debug(res);
-  });
-}
 
 /**
  * @param {object} event
@@ -47,18 +12,14 @@ function postFacebookMessage(recipientId, messageText) {
 module.exports.receivedMessage = function (event) {
   logger.debug(`facebook.receivedMessage:${JSON.stringify(event)}`);
 
-  const userId = event.sender.id;
-  const message = event.message;
-  const messageText = message.text;
+  if (!(event.message && event.message.text)) return;
 
-  if (messageText) {
-    // TODO: Pass mediaUrl instead of null.
-    gambitChatbot.getReply(userId, messageText, null, 'facebook')
-      .then((reply) => {
-        if (!reply.text) return true;
+  const data = {
+    facebookId: event.sender.id,
+    text: event.message.text,
+  };
 
-        return postFacebookMessage(userId, reply.text);
-      })
-      .catch(err => postFacebookMessage(userId, err.message));
-  }
+  gambitConversations.postMessage(data)
+    .then(res => logger.debug('gambitChatbot.postMessage success', res))
+    .catch(err => logger.error('gambitChatbot.postMessage error', err));
 };
