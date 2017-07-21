@@ -3,30 +3,22 @@
 const Slack = require('@slack/client');
 const logger = require('heroku-logger');
 
-const gambitCampaigns = require('../../lib/gambit/campaigns');
-const gambitChatbot = require('../../lib/gambit/chatbot');
+const gambitCampaigns = require('../../lib/gambit-campaigns');
 const slack = require('../../lib/slack');
-const dashbot = require('dashbot')(process.env.DASHBOT_API_KEY).slack;
 
-const RtmClient = Slack.RtmClient;
 const WebClient = Slack.WebClient;
-const RTM_EVENTS = Slack.RTM_EVENTS;
-const CLIENT_EVENTS = Slack.CLIENT_EVENTS;
-
+const RtmClient = Slack.RtmClient;
 const apiToken = process.env.SLACK_API_TOKEN;
 const rtm = new RtmClient(apiToken);
 const web = new WebClient(apiToken);
-let bot;
-let team;
 
 rtm.start();
 
-rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
-  logger.info('Slothbot Slack authenticated.');
+rtm.on(Slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (res) => {
+  const bot = res.self.name;
+  const team = res.team.name;
 
-  dashbot.logConnect(response);
-  bot = response.self;
-  team = response.team;
+  logger.info('Slack.RtmClient authenticated.', { bot, team });
 });
 
 /**
@@ -35,7 +27,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
  * @param {string} environmentName
  * @return {Promise}
  */
-function postCampaignIndexMessage(channel, environmentName) {
+module.exports.postCampaignIndexMessage = function (channel, environmentName) {
   rtm.sendTyping(channel);
 
   return gambitCampaigns.index(environmentName)
@@ -46,15 +38,14 @@ function postCampaignIndexMessage(channel, environmentName) {
         return attachment;
       });
 
-      return web.chat.postMessage(channel, text, { attachments });
+      return this.postMessage(channel, text, { attachments });
     })
     .then(() => logger.debug('postCampaignIndexMessage', { channel, environmentName }))
     .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
+      this.postMessage(channel, err.message);
       logger.error('postCampaignIndexMessage', err);
     });
-}
+};
 
 /**
  * Posts Campaign Detail Message to given Slack channel for given environmentName and campaignId.
@@ -70,20 +61,19 @@ module.exports.postCampaignDetailMessage = function (channel, environmentName, c
     .then((response) => {
       const campaign = response.body.data;
       const text = slack.getCampaignDetailText(environmentName, campaign);
-      const messageTypes = Object.keys(campaign.messages);
-      const attachments = messageTypes.map((messageType, index) => {
-        const messageData = campaign.messages[messageType];
+      const templates = Object.keys(campaign.messages);
+      const attachments = templates.map((template, index) => {
+        const messageData = campaign.messages[template];
 
-        return slack.parseCampaignMessageAsAttachment(messageType, messageData, index);
+        return slack.parseCampaignMessageAsAttachment(template, messageData, index);
       });
 
-      return web.chat.postMessage(channel, text, { attachments });
+      return this.postMessage(channel, text, { attachments });
     })
     .then(() => logger.debug(`campaignGet channel=${channel} environment=${environmentName}`))
     .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error(message);
+      this.postMessage(channel, err.message);
+      logger.error('postCampaignDetailMessage', err);
     });
 };
 
@@ -92,69 +82,6 @@ module.exports.postCampaignDetailMessage = function (channel, environmentName, c
  * @param {string} channel
  * @param {string} messageText
  */
-function postMessage(channel, messageText, args) {
+module.exports.postMessage = function (channel, messageText, args) {
   web.chat.postMessage(channel, messageText, args);
-}
-
-/**
- * Posts Slack message for a given Slothie Action.
- */
-module.exports.postMessageForAction = function (action) {
-  if (action.type !== 'updateUserPaused') {
-    return;
-  }
-
-  const message = slack.parseUpdateUserPausedActionAsMessage(action);
-  postMessage(process.env.SLACK_ALERT_CHANNEL, message.text, { attachments: message.attachments });
 };
-
-
-/**
- * Handle message events.
- */
-rtm.on(RTM_EVENTS.MESSAGE, (message) => {
-  // Only respond to private messages.
-  if (message.channel[0] !== 'D') return null;
-
-  // Don't reply to our sent messages.
-  if (message.reply_to || message.bot_id) {
-    return null;
-  }
-
-  logger.debug('slack message received', message);
-  const channel = message.channel;
-  const keyword = message.text.toLowerCase().trim();
-
-  if (keyword === 'keywords') {
-    return postCampaignIndexMessage(channel, 'production');
-  }
-
-  if (keyword === 'thor') {
-    return postCampaignIndexMessage(channel, 'thor');
-  }
-
-  dashbot.logIncoming(bot, team, message);
-  let mediaUrl = null;
-  // Hack to upload images (when an image is shared over DM, it's private in Slack).
-  if (keyword === 'photo') {
-    // TODO: Allow pasting image URL.
-    mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
-  }
-
-  return gambitChatbot.getReply(message.user, message.text, mediaUrl, 'slack')
-    .then((reply) => {
-      // We can sometimes get the silent treatment (e.g. in the Crisis Inbox).
-      if (!reply.text) return true;
-
-      // @see https://www.dashbot.io/sdk/slack
-      const dashbotPayload = {
-        type: 'message',
-        text: reply.text,
-        channel,
-      };
-      dashbot.logOutgoing(bot, team, dashbotPayload);
-
-      return rtm.sendMessage(reply.text, channel);
-    })
-    .catch(err => rtm.sendMessage(err.message, channel));
-});
