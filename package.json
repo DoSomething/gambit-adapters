@@ -1,6 +1,6 @@
 {
   "name": "slothbot",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "lets get causey",
   "engines": {
     "node": ">=6.11.1"
