@@ -147,7 +147,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     mediaUrl,
   };
 
-  return gambitConversations.postMessage(data)
-    .then(res => logger.debug('gambitChatbot.postMessage success', res))
+  return gambitConversations.postInboundMessage(data)
+    .then(res => logger.debug('gambitConversations.postInboundMessage', res.body))
     .catch(err => rtm.sendMessage(err.message, channel));
 });
