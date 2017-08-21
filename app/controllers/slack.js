@@ -85,6 +85,23 @@ module.exports.postCampaignDetailMessage = function (channel, environmentName, c
 };
 
 /**
+ * @param {string} channelId
+ * @param {string} userId - Slack ID
+ */
+module.exports.postExternalSignupMenuMessage = function (channelId, userId, campaignId) {
+  const data = {
+    slackChannel: channelId,
+    slackId: userId,
+    campaignId,
+    template: 'externalSignupMenuMessage',
+  };
+
+  return gambitConversations.postOutboundMessage(data)
+    .then(res => logger.debug('gambitConversations.postOutboundMessage', res.body))
+    .catch(err => rtm.sendMessage(err.message, channelId));
+};
+
+/**
  * Posts given messageText to given Slack channel.
  * @param {string} channel
  * @param {string} messageText
