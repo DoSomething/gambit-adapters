@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -13,6 +12,7 @@ require('./app/routes')(app);
 const WINSTON_LEVEL = process.env.LOGGING_LEVEL || 'info';
 
 const logger = require('winston');
+
 logger.configure({
   transports: [
     new logger.transports.Console({
