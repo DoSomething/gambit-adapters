@@ -16,12 +16,19 @@ router.post('/', (req, res) => {
   if (payload.token !== process.env.SLACK_VERFICIATION_TOKEN) {
     return res.status(403).end('Access forbidden');
   }
-
   res.status(200).end();
-  const channelId = payload.channel.id;
-  const data = slack.parseCallbackId(payload.callback_id);
 
-  return controller.postCampaignDetailMessage(channelId, data.environmentName, data.campaignId);
+  const channelId = payload.channel.id;
+  const userId = payload.user.id;
+  const data = slack.parseCallbackId(payload);
+  const campaignId = data.campaignId;
+  const action = payload.actions[0];
+
+  if (action.value === 'external-signup') {
+    return controller.postExternalSignupMenuMessage(channelId, userId, campaignId);
+  }
+
+  return controller.postCampaignDetailMessage(channelId, data.environmentName, campaignId);
 });
 
 module.exports = router;
