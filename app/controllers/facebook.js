@@ -16,6 +16,7 @@ module.exports.receivedMessage = function (event) {
 
   const data = {
     facebookId: event.sender.id,
+    messageId: event.message.mid,
     text: event.message.text,
   };
 
