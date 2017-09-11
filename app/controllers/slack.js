@@ -160,6 +160,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   const data = {
     slackId: message.user,
     slackChannel: message.channel,
+    messageId: message.ts,
     text: message.text,
     mediaUrl,
   };
