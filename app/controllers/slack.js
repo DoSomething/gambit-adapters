@@ -67,11 +67,11 @@ module.exports.postCampaignDetailMessage = function (channel, environmentName, c
     .then((response) => {
       const campaign = response.body.data;
       const text = slack.getCampaignDetailText(environmentName, campaign);
-      const messageTypes = Object.keys(campaign.messages);
-      const attachments = messageTypes.map((messageType, index) => {
-        const messageData = campaign.messages[messageType];
+      const templates = Object.keys(campaign.templates);
+      const attachments = templates.map((template, index) => {
+        const messageData = campaign.templates[template];
 
-        return slack.parseCampaignMessageAsAttachment(messageType, messageData, index);
+        return slack.parseCampaignMessageAsAttachment(template, messageData, index);
       });
 
       return web.chat.postMessage(channel, text, { attachments });
