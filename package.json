@@ -1,9 +1,9 @@
 {
-  "name": "slothbot",
+  "name": "gambit-adapters",
   "version": "1.10.2",
-  "description": "lets get causey",
+  "description": "A Gambit Slack app",
   "engines": {
-    "node": ">=6.11.1"
+    "node": "6.11.x"
   },
   "main": "index.js",
   "scripts": {
