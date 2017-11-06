@@ -93,7 +93,7 @@ module.exports.postExternalSignupMenuMessage = function (channelId, userId, camp
     slackChannel: channelId,
     slackId: userId,
     campaignId,
-    template: 'externalSignupMenuMessage',
+    template: 'externalSignupMenu',
   };
 
   return gambitConversations.postOutboundMessage(data)
