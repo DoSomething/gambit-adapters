@@ -54,37 +54,6 @@ function postCampaignIndexMessage(channel, environmentName) {
 }
 
 /**
- * Posts Campaign Detail Message to given Slack channel for given environmentName and campaignId.
- * @param {object} channel
- * @param {string} environmentName
- * @param {number} campaignId
- * @return {Promise}
- */
-module.exports.postCampaignDetailMessage = function (channel, environmentName, campaignId) {
-  rtm.sendTyping(channel);
-
-  return gambitCampaigns.get(environmentName, campaignId)
-    .then((response) => {
-      const campaign = response.body.data;
-      const text = slack.getCampaignDetailText(environmentName, campaign);
-      const templates = Object.keys(campaign.templates);
-      const attachments = templates.map((template, index) => {
-        const messageData = campaign.templates[template];
-
-        return slack.parseCampaignMessageAsAttachment(template, messageData, index);
-      });
-
-      return web.chat.postMessage(channel, text, { attachments });
-    })
-    .then(() => logger.debug(`campaignGet channel=${channel} environment=${environmentName}`))
-    .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error(message);
-    });
-};
-
-/**
  * @param {string} channelId
  * @param {string} userId - Slack ID
  */
@@ -109,19 +78,6 @@ module.exports.postExternalSignupMenuMessage = function (channelId, userId, camp
 function postMessage(channel, messageText, args) {
   web.chat.postMessage(channel, messageText, args);
 }
-
-/**
- * Posts Slack message for a given Slothie Action.
- */
-module.exports.postMessageForAction = function (action) {
-  if (action.type !== 'updateUserPaused') {
-    return;
-  }
-
-  const message = slack.parseUpdateUserPausedActionAsMessage(action);
-  postMessage(process.env.SLACK_ALERT_CHANNEL, message.text, { attachments: message.attachments });
-};
-
 
 /**
  * Handle message events.
