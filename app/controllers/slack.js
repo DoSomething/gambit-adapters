@@ -102,7 +102,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return postCampaignIndexMessage(channel, 'production');
   }
 
-  if (command === 'thor') {
+  if (command === 'thor' || command === 'staging') {
     return postCampaignIndexMessage(channel, 'thor');
   }
 
