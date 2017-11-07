@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const logger = require('heroku-logger');
 const controller = require('../controllers/slack');
 const slack = require('../../lib/slack');
 
@@ -28,7 +29,8 @@ router.post('/', (req, res) => {
     return controller.postExternalSignupMenuMessage(channelId, userId, campaignId);
   }
 
-  return controller.postCampaignDetailMessage(channelId, data.environmentName, campaignId);
+  logger.info('Unknown action', { action, campaignId, userId, channelId });
+  return null;
 });
 
 module.exports = router;

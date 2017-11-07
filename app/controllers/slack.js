@@ -71,15 +71,6 @@ module.exports.postExternalSignupMenuMessage = function (channelId, userId, camp
 };
 
 /**
- * Posts given messageText to given Slack channel.
- * @param {string} channel
- * @param {string} messageText
- */
-function postMessage(channel, messageText, args) {
-  web.chat.postMessage(channel, messageText, args);
-}
-
-/**
  * Handle message events.
  */
 rtm.on(RTM_EVENTS.MESSAGE, (message) => {
