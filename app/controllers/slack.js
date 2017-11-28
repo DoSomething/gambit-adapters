@@ -15,15 +15,13 @@ const CLIENT_EVENTS = Slack.CLIENT_EVENTS;
 const apiToken = process.env.SLACK_API_TOKEN;
 const rtm = new RtmClient(apiToken);
 const web = new WebClient(apiToken);
-let bot;
-let team;
 
 rtm.start();
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
-  bot = response.self.name;
-  team = response.team.name;
-  logger.info('Gambit Slack authenticated.', { bot, team });
+  const bot = response.self.name;
+  const team = response.team.name;
+  logger.info('Slack authenticated.', { bot, team });
 });
 
 /**
