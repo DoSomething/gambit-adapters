@@ -20,7 +20,6 @@
     "contentful": "^3.8.1",
     "dashbot": "^0.8.6",
     "express": "^4.15.3",
-    "fb": "^2.0.0",
     "heroku-logger": "^0.1.1",
     "request": "^2.81.0",
     "superagent": "^3.5.0",
