@@ -101,9 +101,9 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
-
+  const slackId = message.user;
   const data = {
-    slackId: message.user,
+    slackId,
     slackChannel: message.channel,
     messageId: message.ts,
     text: message.text,
@@ -111,6 +111,12 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   };
 
   return gambitConversations.postInboundMessage(data)
-    .then(res => logger.debug('gambitConversations.postInboundMessage', res.body))
+    .then((res) => {
+      const outboundMessage = res.body.data.messages.outbound[0];
+      logger.debug('gambitConversations response', {
+        slackId,
+        template: outboundMessage.template,
+      });
+    })
     .catch(err => rtm.sendMessage(err.message, channel));
 });
