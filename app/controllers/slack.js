@@ -23,7 +23,7 @@ rtm.start();
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
   bot = response.self.name;
   team = response.team.name;
-  logger.info('Slothbot Slack authenticated.', { bot, team });
+  logger.info('Gambit Slack authenticated.', { bot, team });
 });
 
 /**

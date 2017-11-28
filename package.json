@@ -1,5 +1,5 @@
 {
-  "name": "gambit-adapters",
+  "name": "gambit-slack",
   "version": "1.10.2",
   "description": "A Gambit Slack app",
   "engines": {
