@@ -3,7 +3,7 @@
   "version": "1.10.2",
   "description": "A Gambit Slack app",
   "engines": {
-    "node": "6.11.x"
+    "node": "6.12.x"
   },
   "main": "index.js",
   "scripts": {
