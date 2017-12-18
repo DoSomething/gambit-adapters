@@ -1,42 +1,15 @@
-# Slothbot
-Slothbot is an internal DoSomething.org Slack app used for tasks like returning [Gambit API](http://github.com/dosomething/gambit) queries. Slothbot is built with [Botkit](https://github.com/howdyai/botkit).
+# Gambit Slack
 
-The Slothbot is named in honor of the DoSomething Puppet Sloth, who would like to remind you from the grave that he once [interviewed Tyler Oakley](https://youtu.be/wetvnbDB4wg).
+Gambit Slack is an internal DoSomething.org Slack client for [Gambit Conversations](https://github.com/dosomething/gambit-conversations). Gambit Slack is built using [Express](http://expressjs.com/).
 
-Commands for mentioning `@slothbot`:
+It also provides commands for interacting with the Gambit API:
 
-* `help` -- introduction, list direct messages commands
+* `keywords` -- returns all production Gambit Campaigns and Keywords 
+* `staging` or `thor` -- returns all Staging Gambit Campaigns and Keywords. Provides buttons to test a web signup confirmation for each Campaign.
 
-Commands for direct messages to `@slothbot`:
-
-* `keywords` -- returns all production Gambit campaigns and keywords 
-* `thor` -- returns all Thor Gambit campaigns and keywords
-
-## Development
-
-DoSomething staffers interact with the Slack app (and bot) called Slothbot, which runs on Heroku.
-
-There's a second Slack app, Slothbot Dev, used for developers to work on Slothbot locally.
-
-### Getting Started
-
-Install Node, ngrok, and the Heroku toolbelt. 
-
-Next, clone this repository and create a `.env` file with the [Client ID, Client Secret](https://api.slack.com/apps/A4HJDDLUQ/general), and [Bot User Access Token](https://api.slack.com/apps/A4HJDDLUQ/oauth) for our "Slothbot Dev" Slack app, and the settings for our the Slothbot Contentful space.
-
-To run Slothbot locally, execute `heroku local` from your Slothbot directory. The `@slothbot-dev` Slack bot user should appear online. Messages received by the `@slothbot-dev` bot will be sent to your local Slothbot instance.
-
-### Interactive Messages
-
-To test interactive messages, you'll need to run ngrok on your localhost: `ngrok http 5000`.
-
-Update the [Slothbot Dev Interactive Messages URL](https://api.slack.com/apps/A4HJDDLUQ/interactive-messages) with the URL returned by ngrok. but keeping the Botkit-defined `/slack/receieve` path, e.g. https://36ed0448.ngrok.io/slack/receive.
-
-<img src="https://cloud.githubusercontent.com/assets/1236811/24002302/9e8ebd0a-0a1d-11e7-9e14-4b9b91ce3d20.png" width="600">
-
-Interactive Messages callbacks (e.g. clicking on a View Messages button in the list of Campaigns) will now be sent to your localhost.
+[Documentation](https://github.com/DoSomething/gambit-slack/wiki)
 
 ### License
-&copy;2017 DoSomething.org. Gambit is free software, and may be redistributed under the terms specified
-in the [LICENSE](https://github.com/DoSomething/slothbot/blob/master/LICENSE) file. The name and logo for
+&copy;2017 DoSomething.org. Gambit Slack is free software, and may be redistributed under the terms specified
+in the [LICENSE](https://github.com/DoSomething/gambit-slack/blob/master/LICENSE) file. The name and logo for
 DoSomething.org are trademarks of Do Something, Inc and may not be used without permission.

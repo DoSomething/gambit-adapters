@@ -1,9 +1,9 @@
 {
-  "name": "slothbot",
+  "name": "gambit-slack",
   "version": "1.10.2",
-  "description": "lets get causey",
+  "description": "A Gambit Slack app",
   "engines": {
-    "node": ">=6.11.1"
+    "node": "6.12.x"
   },
   "main": "index.js",
   "scripts": {
@@ -17,14 +17,9 @@
     "@slack/client": "^3.10.0",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
-    "contentful": "^3.8.1",
-    "dashbot": "^0.8.6",
     "express": "^4.15.3",
-    "fb": "^2.0.0",
     "heroku-logger": "^0.1.1",
-    "request": "^2.81.0",
-    "superagent": "^3.5.0",
-    "winston": "^2.3.1"
+    "superagent": "^3.5.0"
   },
   "devDependencies": {
     "@dosomething/eslint-config": "^2.0.0",
@@ -32,5 +27,13 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoSomething/gambit-slack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DoSomething/gambit-slack/issues"
+  },
+  "homepage": "https://github.com/DoSomething/gambit-slack#readme"
 }

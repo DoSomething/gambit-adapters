@@ -15,15 +15,13 @@ const CLIENT_EVENTS = Slack.CLIENT_EVENTS;
 const apiToken = process.env.SLACK_API_TOKEN;
 const rtm = new RtmClient(apiToken);
 const web = new WebClient(apiToken);
-let bot;
-let team;
 
 rtm.start();
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
-  bot = response.self.name;
-  team = response.team.name;
-  logger.info('Slothbot Slack authenticated.', { bot, team });
+  const bot = response.self.name;
+  const team = response.team.name;
+  logger.info('Slack authenticated.', { bot, team });
 });
 
 /**
@@ -54,37 +52,6 @@ function postCampaignIndexMessage(channel, environmentName) {
 }
 
 /**
- * Posts Campaign Detail Message to given Slack channel for given environmentName and campaignId.
- * @param {object} channel
- * @param {string} environmentName
- * @param {number} campaignId
- * @return {Promise}
- */
-module.exports.postCampaignDetailMessage = function (channel, environmentName, campaignId) {
-  rtm.sendTyping(channel);
-
-  return gambitCampaigns.get(environmentName, campaignId)
-    .then((response) => {
-      const campaign = response.body.data;
-      const text = slack.getCampaignDetailText(environmentName, campaign);
-      const templates = Object.keys(campaign.templates);
-      const attachments = templates.map((template, index) => {
-        const messageData = campaign.templates[template];
-
-        return slack.parseCampaignMessageAsAttachment(template, messageData, index);
-      });
-
-      return web.chat.postMessage(channel, text, { attachments });
-    })
-    .then(() => logger.debug(`campaignGet channel=${channel} environment=${environmentName}`))
-    .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error(message);
-    });
-};
-
-/**
  * @param {string} channelId
  * @param {string} userId - Slack ID
  */
@@ -93,35 +60,13 @@ module.exports.postExternalSignupMenuMessage = function (channelId, userId, camp
     slackChannel: channelId,
     slackId: userId,
     campaignId,
-    template: 'externalSignupMenuMessage',
+    template: 'externalSignupMenu',
   };
 
   return gambitConversations.postOutboundMessage(data)
     .then(res => logger.debug('gambitConversations.postOutboundMessage', res.body))
     .catch(err => rtm.sendMessage(err.message, channelId));
 };
-
-/**
- * Posts given messageText to given Slack channel.
- * @param {string} channel
- * @param {string} messageText
- */
-function postMessage(channel, messageText, args) {
-  web.chat.postMessage(channel, messageText, args);
-}
-
-/**
- * Posts Slack message for a given Slothie Action.
- */
-module.exports.postMessageForAction = function (action) {
-  if (action.type !== 'updateUserPaused') {
-    return;
-  }
-
-  const message = slack.parseUpdateUserPausedActionAsMessage(action);
-  postMessage(process.env.SLACK_ALERT_CHANNEL, message.text, { attachments: message.attachments });
-};
-
 
 /**
  * Handle message events.
@@ -146,7 +91,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     return postCampaignIndexMessage(channel, 'production');
   }
 
-  if (command === 'thor') {
+  if (command === 'thor' || command === 'staging') {
     return postCampaignIndexMessage(channel, 'thor');
   }
 
@@ -156,9 +101,9 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
-
+  const slackId = message.user;
   const data = {
-    slackId: message.user,
+    slackId,
     slackChannel: message.channel,
     messageId: message.ts,
     text: message.text,
@@ -166,6 +111,12 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   };
 
   return gambitConversations.postInboundMessage(data)
-    .then(res => logger.debug('gambitConversations.postInboundMessage', res.body))
+    .then((res) => {
+      const outboundMessage = res.body.data.messages.outbound[0];
+      logger.debug('gambitConversations response', {
+        slackId,
+        template: outboundMessage.template,
+      });
+    })
     .catch(err => rtm.sendMessage(err.message, channel));
 });
