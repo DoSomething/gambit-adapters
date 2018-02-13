@@ -63,8 +63,8 @@ module.exports.postExternalSignupMenuMessage = function (channelId, userId, camp
     template: 'externalSignupMenu',
   };
 
-  return gambitConversations.postOutboundMessage(data)
-    .then(res => logger.debug('gambitConversations.postOutboundMessage', res.body))
+  return gambitConversations.postSignupMessage(data)
+    .then(res => logger.debug('gambitConversations.postSignupMessage', res.body))
     .catch(err => rtm.sendMessage(err.message, channelId));
 };
 
@@ -101,22 +101,23 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
     // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
-  const slackId = message.user;
-  const data = {
-    slackId,
-    slackChannel: message.channel,
+
+  const payload = {
+    platform: 'slack',
     messageId: message.ts,
     text: message.text,
     mediaUrl,
   };
 
-  return gambitConversations.postInboundMessage(data)
+  return web.users.info(message.user)
     .then((res) => {
-      const outboundMessage = res.body.data.messages.outbound[0];
-      logger.debug('gambitConversations response', {
-        slackId,
-        template: outboundMessage.template,
-      });
+      payload.email = res.user.profile.email;
+      return gambitConversations.postSlackMessage(payload);
+    })
+    .then((res) => {
+      logger.debug('gambit response', { data: res.body.data });
+      const reply = res.body.data.messages.outbound[0];
+      return rtm.sendMessage(reply.text, channel);
     })
     .catch(err => rtm.sendMessage(err.message, channel));
 });

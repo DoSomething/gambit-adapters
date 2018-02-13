@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
   const action = payload.actions[0];
 
   if (action.value === 'external-signup') {
-    return controller.postExternalSignupMenuMessage(channelId, userId, campaignId);
+    return controller.postSignupMenuMessage(channelId, userId, campaignId);
   }
 
   logger.info('Unknown action', { action, campaignId, userId, channelId });
