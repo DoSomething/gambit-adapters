@@ -14,6 +14,7 @@
   "author": "DoSomething.org",
   "license": "MIT",
   "dependencies": {
+    "@dosomething/northstar-js": "^1.0.0",
     "@slack/client": "^3.10.0",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",

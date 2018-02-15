@@ -5,6 +5,7 @@ const logger = require('heroku-logger');
 
 const gambitCampaigns = require('../../lib/gambit/campaigns');
 const gambitConversations = require('../../lib/gambit/conversations');
+const northstar = require('../../lib/northstar');
 const slack = require('../../lib/slack');
 
 const RtmClient = Slack.RtmClient;
@@ -15,6 +16,7 @@ const CLIENT_EVENTS = Slack.CLIENT_EVENTS;
 const apiToken = process.env.SLACK_API_TOKEN;
 const rtm = new RtmClient(apiToken);
 const web = new WebClient(apiToken);
+const platform = 'gambit-slack';
 
 rtm.start();
 
@@ -23,6 +25,11 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
   const team = response.team.name;
   logger.info('Slack authenticated.', { bot, team });
 });
+
+function fetchNorthstarUserForSlackUserId(slackUserId) {
+  return web.users.info(slackUserId)
+    .then(slackRes => northstar.fetchUserByEmail(slackRes.user.profile.email));
+}
 
 /**
  * Posts Campaign List Message to given Slack channel for given environmentName.
@@ -55,16 +62,22 @@ function postCampaignIndexMessage(channel, environmentName) {
  * @param {string} channelId
  * @param {string} userId - Slack ID
  */
-module.exports.postExternalSignupMenuMessage = function (channelId, userId, campaignId) {
-  const data = {
-    slackChannel: channelId,
-    slackId: userId,
+module.exports.postSignupMenuMessage = function (channelId, slackUserId, campaignId) {
+  const payload = {
     campaignId,
-    template: 'externalSignupMenu',
+    platform,
   };
 
-  return gambitConversations.postSignupMessage(data)
-    .then(res => logger.debug('gambitConversations.postSignupMessage', res.body))
+  return fetchNorthstarUserForSlackUserId(slackUserId)
+    .then((user) => {
+      payload.northstarId = user.id;
+      return gambitConversations.postOutboundMessage(payload);
+    })
+    .then((gambitRes) => {
+      const data = gambitRes.body.data;
+      logger.debug('gambitConversations.postOutboundMessage', { data });
+      return rtm.sendMessage(data.messages[0].text, channelId);
+    })
     .catch(err => rtm.sendMessage(err.message, channelId));
 };
 
@@ -103,20 +116,22 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   }
 
   const payload = {
-    platform: 'slack',
     messageId: message.ts,
     text: message.text,
     mediaUrl,
   };
 
-  return web.users.info(message.user)
-    .then((res) => {
-      payload.email = res.user.profile.email;
+  return fetchNorthstarUserForSlackUserId(message.user)
+    .then((northstarUser) => {
+      payload.northstarId = northstarUser.id;
       return gambitConversations.postSlackMessage(payload);
     })
-    .then((res) => {
-      logger.debug('gambit response', { data: res.body.data });
-      const reply = res.body.data.messages.outbound[0];
+    .then((gambitRes) => {
+      logger.debug('gambit response', { data: gambitRes.body.data });
+      const reply = gambitRes.body.data.messages.outbound[0];
+      if (!reply.text) {
+        return true;
+      }
       return rtm.sendMessage(reply.text, channel);
     })
     .catch(err => rtm.sendMessage(err.message, channel));
