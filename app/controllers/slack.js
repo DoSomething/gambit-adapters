@@ -89,7 +89,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   if (message.channel[0] !== 'D') return null;
 
   // Don't reply to our sent messages.
-  if (message.reply_to || message.bot_id) {
+  if (message.reply_to || message.bot_id || message.subtype === 'bot_message') {
     return null;
   }
 
@@ -127,7 +127,6 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
       return gambitConversations.postSlackMessage(payload);
     })
     .then((gambitRes) => {
-      logger.debug('gambit response', { data: gambitRes.body.data });
       const reply = gambitRes.body.data.messages.outbound[0];
       if (!reply.text) {
         return true;
