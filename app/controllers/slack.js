@@ -26,6 +26,10 @@ rtm.on(Slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
 });
 
 function fetchNorthstarUserForSlackUserId(slackUserId) {
+  if (!slackUserId) {
+    return Promise.resolve();
+  }
+
   return cache.get(slackUserId)
     .then((user) => {
       if (user) {
@@ -69,9 +73,10 @@ function postCampaignIndexMessage(channel, environmentName) {
 
 /**
  * @param {string} channelId
- * @param {string} userId - Slack ID
+ * @param {string} slackUserId
+ * @param {string} campaignId
  */
-module.exports.postSignupMenuMessage = function (channelId, slackUserId, campaignId) {
+module.exports.postSignupMessage = function (channelId, slackUserId, campaignId) {
   const payload = {
     campaignId,
     platform,
