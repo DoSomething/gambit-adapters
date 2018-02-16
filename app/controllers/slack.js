@@ -1,6 +1,7 @@
 'use strict';
 
 const Slack = require('@slack/client');
+const Cacheman = require('cacheman');
 const logger = require('heroku-logger');
 
 const gambitCampaigns = require('../../lib/gambit/campaigns');
@@ -8,27 +9,35 @@ const gambitConversations = require('../../lib/gambit/conversations');
 const northstar = require('../../lib/northstar');
 const slack = require('../../lib/slack');
 
-const RtmClient = Slack.RtmClient;
-const WebClient = Slack.WebClient;
-const RTM_EVENTS = Slack.RTM_EVENTS;
-const CLIENT_EVENTS = Slack.CLIENT_EVENTS;
-
+// TODO: Move env variables to config.
 const apiToken = process.env.SLACK_API_TOKEN;
-const rtm = new RtmClient(apiToken);
-const web = new WebClient(apiToken);
+const rtm = new Slack.RtmClient(apiToken);
+const web = new Slack.WebClient(apiToken);
+const ttl = process.env.CACHE_TTL || 1440;
+const cache = new Cacheman({ ttl });
 const platform = 'gambit-slack';
 
 rtm.start();
 
-rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
+rtm.on(Slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
   const bot = response.self.name;
   const team = response.team.name;
   logger.info('Slack authenticated.', { bot, team });
 });
 
 function fetchNorthstarUserForSlackUserId(slackUserId) {
-  return web.users.info(slackUserId)
-    .then(slackRes => northstar.fetchUserByEmail(slackRes.user.profile.email));
+  return cache.get(slackUserId)
+    .then((user) => {
+      if (user) {
+        logger.debug('cache hit', { slackUserId });
+        return user;
+      }
+      logger.debug('cache miss', { slackUserId });
+      return web.users.info(slackUserId)
+        .then(slackRes => northstar.fetchUserByEmail(slackRes.user.profile.email))
+        .then(northstarUser => cache.set(slackUserId, northstarUser))
+        .then(cachedUser => cachedUser);
+    });
 }
 
 /**
@@ -84,7 +93,7 @@ module.exports.postSignupMenuMessage = function (channelId, slackUserId, campaig
 /**
  * Handle message events.
  */
-rtm.on(RTM_EVENTS.MESSAGE, (message) => {
+rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   // Only respond to private messages.
   if (message.channel[0] !== 'D') return null;
 
