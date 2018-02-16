@@ -71,11 +71,11 @@ module.exports.postSignupMenuMessage = function (channelId, slackUserId, campaig
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then((user) => {
       payload.northstarId = user.id;
-      return gambitConversations.postOutboundMessage(payload);
+      return gambitConversations.postSignupMessage(payload);
     })
     .then((gambitRes) => {
       const data = gambitRes.body.data;
-      logger.debug('gambitConversations.postOutboundMessage', { data });
+      logger.debug('gambitConversations.postSignupMessage', { data });
       return rtm.sendMessage(data.messages[0].text, channelId);
     })
     .catch(err => rtm.sendMessage(err.message, channelId));
