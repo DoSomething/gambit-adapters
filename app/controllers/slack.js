@@ -96,6 +96,30 @@ module.exports.postSignupMessage = function (channelId, slackUserId, campaignId)
 };
 
 /**
+ * @param {string} channelId
+ * @param {string} slackUserId
+ * @param {string} broadcastId
+ */
+module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcastId) {
+  const payload = {
+    broadcastId,
+    platform,
+  };
+
+  return fetchNorthstarUserForSlackUserId(slackUserId)
+    .then((user) => {
+      payload.northstarId = user.id;
+      return gambitConversations.postBroadcastMessage(payload);
+    })
+    .then((gambitRes) => {
+      const data = gambitRes.body.data;
+      logger.debug('gambitConversations.postBroadcastMessage', { data });
+      return rtm.sendMessage(data.messages[0].text, channelId);
+    })
+    .catch(err => rtm.sendMessage(err.message, channelId));
+};
+
+/**
  * Handle message events.
  */
 rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
@@ -122,6 +146,14 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
     return postCampaignIndexMessage(channel, 'thor');
   }
 
+  const slackUserId = message.user;
+
+  // Hardcoding Broadcast command as a single Broadcast ID for now.
+  // TODO: Accept a 2nd ID parameter, e.g. "broadcast 5mPrrJjImQAGYi4goYWk2S"
+  if (command === 'broadcast') {
+    return module.exports.postBroadcastMessage(channel, slackUserId, '5mPrrJjImQAGYi4goYWk2S');
+  }
+
   let mediaUrl = null;
   // Hack to upload images (when an image is shared over DM, it's private in Slack).
   if (command === 'photo') {
@@ -135,7 +167,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
     mediaUrl,
   };
 
-  return fetchNorthstarUserForSlackUserId(message.user)
+  return fetchNorthstarUserForSlackUserId(slackUserId)
     .then((northstarUser) => {
       payload.northstarId = northstarUser.id;
       return gambitConversations.postSlackMessage(payload);
