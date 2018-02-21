@@ -126,23 +126,18 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
     return null;
   }
 
-  logger.debug('slack message received', message);
+  helpers.message.parseMessage(message);
+
   const channel = message.channel;
-  let command;
-  if (message.text) {
-    command = message.text.toLowerCase().trim();
-  }
+  const command = message.command;
+  const slackUserId = message.user;
 
   if (command === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
-
   if (command === 'thor' || command === 'staging') {
     return postCampaignIndexMessage(channel, 'thor');
   }
-
-  const slackUserId = message.user;
-
   // Hardcoding Broadcast command as a single Broadcast ID for now.
   // TODO: Accept a 2nd ID parameter, e.g. "broadcast 5mPrrJjImQAGYi4goYWk2S"
   if (command === 'broadcast') {
@@ -152,7 +147,6 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   let mediaUrl = null;
   // Hack to upload images (when an image is shared over DM, it's private in Slack).
   if (command === 'photo') {
-    // TODO: Allow pasting image URL.
     mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
   }
 
