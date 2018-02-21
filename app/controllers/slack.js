@@ -138,22 +138,19 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   if (command === 'thor' || command === 'staging') {
     return postCampaignIndexMessage(channel, 'thor');
   }
-  // Hardcoding Broadcast command as a single Broadcast ID for now.
-  // TODO: Accept a 2nd ID parameter, e.g. "broadcast 5mPrrJjImQAGYi4goYWk2S"
   if (command === 'broadcast') {
-    return module.exports.postBroadcastMessage(channel, slackUserId, '5mPrrJjImQAGYi4goYWk2S');
-  }
-
-  let mediaUrl = null;
-  // Hack to upload images (when an image is shared over DM, it's private in Slack).
-  if (command === 'photo') {
-    mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
+    const broadcastId = message.broadcastId;
+    if (!broadcastId) {
+      const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 5mPrrJjImQAGYi4goYWk2S`';
+      return rtm.sendMessage(errorMsg, channel);
+    }
+    return module.exports.postBroadcastMessage(channel, slackUserId, broadcastId);
   }
 
   const payload = {
     messageId: message.ts,
     text: message.text,
-    mediaUrl,
+    mediaUrl: message.mediaUrl,
   };
 
   return fetchNorthstarUserForSlackUserId(slackUserId)
