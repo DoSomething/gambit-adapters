@@ -6,6 +6,7 @@ const logger = require('heroku-logger');
 
 const gambitCampaigns = require('../../lib/gambit/campaigns');
 const gambitConversations = require('../../lib/gambit/conversations');
+const helpers = require('../../lib/helpers');
 const northstar = require('../../lib/northstar');
 const slack = require('../../lib/slack');
 
@@ -20,9 +21,7 @@ const platform = 'gambit-slack';
 rtm.start();
 
 rtm.on(Slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
-  const bot = response.self.name;
-  const team = response.team.name;
-  logger.info('Slack authenticated.', { bot, team });
+  logger.info('Slack authenticated.', { bot: response.self.name });
 });
 
 function fetchNorthstarUserForSlackUserId(slackUserId) {
@@ -123,11 +122,7 @@ module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcas
  * Handle message events.
  */
 rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
-  // Only respond to private messages.
-  if (message.channel[0] !== 'D') return null;
-
-  // Don't reply to our sent messages.
-  if (message.reply_to || message.bot_id || message.subtype === 'bot_message') {
+  if (!helpers.message.isDirectMessageFromUser(message)) {
     return null;
   }
 
