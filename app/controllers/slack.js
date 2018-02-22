@@ -6,6 +6,7 @@ const logger = require('heroku-logger');
 
 const gambitCampaigns = require('../../lib/gambit/campaigns');
 const gambitConversations = require('../../lib/gambit/conversations');
+const helpers = require('../../lib/helpers');
 const northstar = require('../../lib/northstar');
 const slack = require('../../lib/slack');
 
@@ -20,9 +21,7 @@ const platform = 'gambit-slack';
 rtm.start();
 
 rtm.on(Slack.CLIENT_EVENTS.RTM.AUTHENTICATED, (response) => {
-  const bot = response.self.name;
-  const team = response.team.name;
-  logger.info('Slack authenticated.', { bot, team });
+  logger.info('Slack authenticated.', { bot: response.self.name });
 });
 
 function fetchNorthstarUserForSlackUserId(slackUserId) {
@@ -123,48 +122,35 @@ module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcas
  * Handle message events.
  */
 rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
-  // Only respond to private messages.
-  if (message.channel[0] !== 'D') return null;
-
-  // Don't reply to our sent messages.
-  if (message.reply_to || message.bot_id || message.subtype === 'bot_message') {
+  if (!helpers.message.isDirectMessageFromUser(message)) {
     return null;
   }
 
-  logger.debug('slack message received', message);
+  helpers.message.parseMessage(message);
+
   const channel = message.channel;
-  let command;
-  if (message.text) {
-    command = message.text.toLowerCase().trim();
-  }
+  const command = message.command;
+  const slackUserId = message.user;
 
   if (command === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
-
   if (command === 'thor' || command === 'staging') {
     return postCampaignIndexMessage(channel, 'thor');
   }
-
-  const slackUserId = message.user;
-
-  // Hardcoding Broadcast command as a single Broadcast ID for now.
-  // TODO: Accept a 2nd ID parameter, e.g. "broadcast 5mPrrJjImQAGYi4goYWk2S"
   if (command === 'broadcast') {
-    return module.exports.postBroadcastMessage(channel, slackUserId, '5mPrrJjImQAGYi4goYWk2S');
-  }
-
-  let mediaUrl = null;
-  // Hack to upload images (when an image is shared over DM, it's private in Slack).
-  if (command === 'photo') {
-    // TODO: Allow pasting image URL.
-    mediaUrl = 'http://cdn1us.denofgeek.com/sites/denofgeekus/files/dirt-dave-and-gill.jpg';
+    const broadcastId = message.broadcastId;
+    if (!broadcastId) {
+      const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 5mPrrJjImQAGYi4goYWk2S`';
+      return rtm.sendMessage(errorMsg, channel);
+    }
+    return module.exports.postBroadcastMessage(channel, slackUserId, broadcastId);
   }
 
   const payload = {
     messageId: message.ts,
     text: message.text,
-    mediaUrl,
+    mediaUrl: message.mediaUrl,
   };
 
   return fetchNorthstarUserForSlackUserId(slackUserId)
