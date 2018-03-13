@@ -113,7 +113,16 @@ module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcas
     .then((gambitRes) => {
       const data = gambitRes.body.data;
       logger.debug('gambitConversations.postBroadcastMessage', { data });
-      return rtm.sendMessage(data.messages[0].text, channelId);
+      const message = data.messages[0];
+      const attachments = message.attachments.map((attachment) => {
+        const url = attachment.url;
+        // Note: Assuming we're only sending images  in Broadcasts.
+        return {
+          image_url: url,
+          fallback: url,
+        };
+      });
+      return web.chat.postMessage(channelId, message.text, { attachments });
     })
     .catch(err => rtm.sendMessage(err.message, channelId));
 };
