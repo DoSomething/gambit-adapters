@@ -1,5 +1,7 @@
 ---
-  extends: "@dosomething/eslint-config"
+  extends: "@dosomething/eslint-config/server"
+  globals:
+    app: true
   parserOptions:
     # Node requires 'use strict' to use built-in ES6 compatibility.
     # Use script source type, so lint doesn't throw error:
@@ -8,7 +10,7 @@
   rules:
     # We don't use babel here, so require 'use strict'.
     # See https://git.io/vr6I0.
-    no-underscore-dangle: 'off'
     strict:
       - 2
       - "global"
+    jsx-a11y/href-no-hash: off
