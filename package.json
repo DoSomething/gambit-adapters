@@ -1,6 +1,6 @@
 {
   "name": "gambit-slack",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "A Gambit Slack app",
   "engines": {
     "node": "8.11.1",
