@@ -43,13 +43,15 @@ function fetchNorthstarUserForSlackUserId(slackUserId) {
     });
 }
 
+/**
+ * Sends message to channelId where an error that has occurred.
+ * @param {String} channelId
+ * @param {Error} error
+ * @return {Promise}
+ */
 function postErrorMessage(channelId, error) {
-  let errorMessageText = error.message;
-  if (error.response && error.response.body) {
-    errorMessageText = error.response.body.message;
-  }
-  logger.error('postErrorMessage', { errorMessageText });
-  rtm.sendMessage(errorMessageText, channelId);
+  const message = slack.getMessageFromError(error);
+  return web.chat.postMessage(channelId, message.text, { attachments: message.attachments });
 }
 
 /**
