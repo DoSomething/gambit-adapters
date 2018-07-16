@@ -43,6 +43,15 @@ function fetchNorthstarUserForSlackUserId(slackUserId) {
     });
 }
 
+function postErrorMessage(channelId, error) {
+  let errorMessageText = error.message;
+  if (error.response && error.response.body) {
+    errorMessageText = error.response.body.message;
+  }
+  logger.error('postErrorMessage', { errorMessageText });
+  rtm.sendMessage(errorMessageText, channelId);
+}
+
 /**
  * Posts Campaign List Message to given Slack channel for given environmentName.
  * @param {object} channel
@@ -124,7 +133,7 @@ module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcas
       });
       return web.chat.postMessage(channelId, message.text, { attachments });
     })
-    .catch(err => rtm.sendMessage(err.message, channelId));
+    .catch(error => postErrorMessage(channelId, error));
 };
 
 /**
