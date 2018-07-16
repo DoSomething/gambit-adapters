@@ -44,9 +44,20 @@ function fetchNorthstarUserForSlackUserId(slackUserId) {
 }
 
 /**
+ * Sends message to channel where an error that has occurred.
+ * @param {String} channel
+ * @param {Error} error
+ * @return {Promise}
+ */
+function postErrorMessage(channel, error) {
+  const message = slack.getMessageFromError(error);
+  return web.chat.postMessage(channel, message.text, { attachments: message.attachments });
+}
+
+/**
  * Posts Campaign List Message to given Slack channel for given environmentName.
- * @param {object} channel
- * @param {string} environmentName
+ * @param {String} channel
+ * @param {String} environmentName
  * @return {Promise}
  */
 function postCampaignIndexMessage(channel, environmentName) {
@@ -54,28 +65,24 @@ function postCampaignIndexMessage(channel, environmentName) {
 
   return gambitCampaigns.index(environmentName)
     .then((response) => {
-      const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
-      const attachments = response.body.data.map((campaign, index) => {
+      const activeCampaigns = response.body.data.filter(campaign => campaign.status === 'active');
+      const text = `Active campaigns on Gambit ${environmentName.toUpperCase()}:`;
+      const attachments = activeCampaigns.map((campaign, index) => {
         const attachment = slack.parseCampaignAsAttachment(environmentName, campaign, index);
         return attachment;
       });
 
       return web.chat.postMessage(channel, text, { attachments });
     })
-    .then(() => logger.debug('postCampaignIndexMessage', { channel, environmentName }))
-    .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error('postCampaignIndexMessage', err);
-    });
+    .catch(error => postErrorMessage(channel, error));
 }
 
 /**
- * @param {string} channelId
+ * @param {string} channel
  * @param {string} slackUserId
  * @param {string} campaignId
  */
-module.exports.postSignupMessage = function (channelId, slackUserId, campaignId) {
+module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
   const payload = {
     campaignId,
     platform,
@@ -89,17 +96,17 @@ module.exports.postSignupMessage = function (channelId, slackUserId, campaignId)
     .then((gambitRes) => {
       const data = gambitRes.body.data;
       logger.debug('gambitConversations.postSignupMessage', { data });
-      return rtm.sendMessage(data.messages[0].text, channelId);
+      return rtm.sendMessage(data.messages[0].text, channel);
     })
-    .catch(err => rtm.sendMessage(err.message, channelId));
+    .catch(error => postErrorMessage(channel, error));
 };
 
 /**
- * @param {string} channelId
+ * @param {string} channel
  * @param {string} slackUserId
  * @param {string} broadcastId
  */
-module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcastId) {
+module.exports.postBroadcastMessage = function (channel, slackUserId, broadcastId) {
   const payload = {
     broadcastId,
     platform,
@@ -122,9 +129,9 @@ module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcas
           fallback: url,
         };
       });
-      return web.chat.postMessage(channelId, message.text, { attachments });
+      return web.chat.postMessage(channel, message.text, { attachments });
     })
-    .catch(err => rtm.sendMessage(err.message, channelId));
+    .catch(error => postErrorMessage(channel, error));
 };
 
 /**
@@ -144,7 +151,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   if (command === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
-  if (command === 'thor' || command === 'staging') {
+  if (command === 'thor' || command === 'staging' || command === 'qa') {
     return postCampaignIndexMessage(channel, 'thor');
   }
   if (command === 'broadcast') {
@@ -174,5 +181,5 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
       }
       return rtm.sendMessage(reply.text, channel);
     })
-    .catch(err => rtm.sendMessage(err.message, channel));
+    .catch(error => postErrorMessage(channel, error));
 });
