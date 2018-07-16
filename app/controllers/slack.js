@@ -65,8 +65,9 @@ function postCampaignIndexMessage(channel, environmentName) {
 
   return gambitCampaigns.index(environmentName)
     .then((response) => {
-      const text = `Gambit ${environmentName.toUpperCase()} campaigns:`;
-      const attachments = response.body.data.map((campaign, index) => {
+      const activeCampaigns = response.body.data.filter(campaign => campaign.status === 'active');
+      const text = `Active campaigns on Gambit ${environmentName.toUpperCase()}:`;
+      const attachments = activeCampaigns.map((campaign, index) => {
         const attachment = slack.parseCampaignAsAttachment(environmentName, campaign, index);
         return attachment;
       });
