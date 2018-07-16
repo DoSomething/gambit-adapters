@@ -56,8 +56,8 @@ function postErrorMessage(channel, error) {
 
 /**
  * Posts Campaign List Message to given Slack channel for given environmentName.
- * @param {object} channel
- * @param {string} environmentName
+ * @param {String} channel
+ * @param {String} environmentName
  * @return {Promise}
  */
 function postCampaignIndexMessage(channel, environmentName) {
@@ -77,7 +77,7 @@ function postCampaignIndexMessage(channel, environmentName) {
 }
 
 /**
- * @param {string} channelId
+ * @param {string} channel
  * @param {string} slackUserId
  * @param {string} campaignId
  */
