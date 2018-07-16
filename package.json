@@ -20,6 +20,7 @@
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "cacheman": "^2.2.1",
+    "dotenv": "^6.0.0",
     "eslint": "^4.19.1",
     "express": "^4.15.3",
     "heroku-logger": "^0.1.1",
