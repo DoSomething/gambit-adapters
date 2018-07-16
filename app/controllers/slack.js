@@ -44,14 +44,14 @@ function fetchNorthstarUserForSlackUserId(slackUserId) {
 }
 
 /**
- * Sends message to channelId where an error that has occurred.
- * @param {String} channelId
+ * Sends message to channel where an error that has occurred.
+ * @param {String} channel
  * @param {Error} error
  * @return {Promise}
  */
-function postErrorMessage(channelId, error) {
+function postErrorMessage(channel, error) {
   const message = slack.getMessageFromError(error);
-  return web.chat.postMessage(channelId, message.text, { attachments: message.attachments });
+  return web.chat.postMessage(channel, message.text, { attachments: message.attachments });
 }
 
 /**
@@ -81,7 +81,7 @@ function postCampaignIndexMessage(channel, environmentName) {
  * @param {string} slackUserId
  * @param {string} campaignId
  */
-module.exports.postSignupMessage = function (channelId, slackUserId, campaignId) {
+module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
   const payload = {
     campaignId,
     platform,
@@ -95,17 +95,17 @@ module.exports.postSignupMessage = function (channelId, slackUserId, campaignId)
     .then((gambitRes) => {
       const data = gambitRes.body.data;
       logger.debug('gambitConversations.postSignupMessage', { data });
-      return rtm.sendMessage(data.messages[0].text, channelId);
+      return rtm.sendMessage(data.messages[0].text, channel);
     })
-    .catch(err => rtm.sendMessage(err.message, channelId));
+    .catch(error => postErrorMessage(channel, error));
 };
 
 /**
- * @param {string} channelId
+ * @param {string} channel
  * @param {string} slackUserId
  * @param {string} broadcastId
  */
-module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcastId) {
+module.exports.postBroadcastMessage = function (channel, slackUserId, broadcastId) {
   const payload = {
     broadcastId,
     platform,
@@ -128,9 +128,9 @@ module.exports.postBroadcastMessage = function (channelId, slackUserId, broadcas
           fallback: url,
         };
       });
-      return web.chat.postMessage(channelId, message.text, { attachments });
+      return web.chat.postMessage(channel, message.text, { attachments });
     })
-    .catch(error => postErrorMessage(channelId, error));
+    .catch(error => postErrorMessage(channel, error));
 };
 
 /**
@@ -150,7 +150,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   if (command === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
-  if (command === 'thor' || command === 'staging') {
+  if (command === 'thor' || command === 'staging' || command === 'qa') {
     return postCampaignIndexMessage(channel, 'thor');
   }
   if (command === 'broadcast') {
@@ -180,5 +180,5 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
       }
       return rtm.sendMessage(reply.text, channel);
     })
-    .catch(err => rtm.sendMessage(err.message, channel));
+    .catch(error => postErrorMessage(channel, error));
 });
