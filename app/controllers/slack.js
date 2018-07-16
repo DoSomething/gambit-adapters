@@ -73,12 +73,7 @@ function postCampaignIndexMessage(channel, environmentName) {
 
       return web.chat.postMessage(channel, text, { attachments });
     })
-    .then(() => logger.debug('postCampaignIndexMessage', { channel, environmentName }))
-    .catch((err) => {
-      const message = err.message;
-      rtm.sendMessage(message, channel);
-      logger.error('postCampaignIndexMessage', err);
-    });
+    .catch(error => postErrorMessage(channel, error));
 }
 
 /**
