@@ -50,6 +50,7 @@ function fetchNorthstarUserForSlackUserId(slackUserId) {
  * @return {Promise}
  */
 function postErrorMessage(channel, error) {
+  logger.error('postErrorMessage', { error });
   const message = slack.getMessageFromError(error);
   return web.chat.postMessage(channel, message.text, { attachments: message.attachments });
 }
@@ -63,7 +64,7 @@ function postErrorMessage(channel, error) {
 function postCampaignIndexMessage(channel, environmentName) {
   rtm.sendTyping(channel);
 
-  return gambitCampaigns.index(environmentName)
+  return gambitCampaigns.get('campaigns')
     .then((response) => {
       const activeCampaigns = response.body.data.filter(campaign => campaign.status === 'active');
       const text = `Active campaigns on Gambit ${environmentName.toUpperCase()}:`;
@@ -151,9 +152,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   if (command === 'keywords') {
     return postCampaignIndexMessage(channel, 'production');
   }
-  if (command === 'thor' || command === 'staging' || command === 'qa') {
-    return postCampaignIndexMessage(channel, 'thor');
-  }
+
   if (command === 'broadcast') {
     const broadcastId = message.broadcastId;
     if (!broadcastId) {
