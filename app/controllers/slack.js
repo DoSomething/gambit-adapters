@@ -4,7 +4,7 @@ const Slack = require('@slack/client');
 const Cacheman = require('cacheman');
 const logger = require('heroku-logger');
 
-const gambitCampaigns = require('../../lib/gambit/campaigns');
+const gambitAdmin = require('../../lib/gambit/admin');
 const gambitConversations = require('../../lib/gambit/conversations');
 const helpers = require('../../lib/helpers');
 const northstar = require('../../lib/northstar');
@@ -58,22 +58,17 @@ function postErrorMessage(channel, error) {
 /**
  * Posts Campaign List Message to given Slack channel for given environmentName.
  * @param {String} channel
- * @param {String} environmentName
  * @return {Promise}
  */
-function postCampaignIndexMessage(channel, environmentName) {
+function sendWebSignupsIndex(channel) {
   rtm.sendTyping(channel);
 
-  return gambitCampaigns.get('campaigns')
-    .then((response) => {
-      const activeCampaigns = response.body.data.filter(campaign => campaign.status === 'active');
-      const text = `Active campaigns on Gambit ${environmentName.toUpperCase()}:`;
-      const attachments = activeCampaigns.map((campaign, index) => {
-        const attachment = slack.parseCampaignAsAttachment(environmentName, campaign, index);
-        return attachment;
-      });
-
-      return web.chat.postMessage(channel, text, { attachments });
+  return gambitAdmin.get('campaigns')
+    .then((res) => {
+      const activeCampaigns = res.body.filter(campaign => campaign.status === 'active');
+      const attachments = activeCampaigns.map((campaign, index) => slack
+        .parseCampaignAsAttachment(campaign, index));
+      return web.chat.postMessage(channel, 'Current campaigns', { attachments });
     })
     .catch(error => postErrorMessage(channel, error));
 }
@@ -149,8 +144,8 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   const command = message.command;
   const slackUserId = message.user;
 
-  if (command === 'keywords') {
-    return postCampaignIndexMessage(channel, 'production');
+  if (command === 'web') {
+    return sendWebSignupsIndex(channel);
   }
 
   if (command === 'broadcast') {

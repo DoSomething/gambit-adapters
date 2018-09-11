@@ -25,7 +25,7 @@ router.post('/', (req, res) => {
   const campaignId = data.campaignId;
   const action = payload.actions[0];
 
-  if (action.value === 'external-signup') {
+  if (action.value === 'webSignup') {
     return controller.postSignupMessage(channelId, userId, campaignId);
   }
 
