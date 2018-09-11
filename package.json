@@ -15,7 +15,7 @@
   "author": "DoSomething.org",
   "license": "MIT",
   "dependencies": {
-    "@dosomething/northstar-js": "^1.0.0",
+    "@dosomething/northstar-js": "git://github.com/DoSomething/northstar-js.git",
     "@slack/client": "^3.10.0",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
@@ -24,7 +24,7 @@
     "eslint": "^4.19.1",
     "express": "^4.15.3",
     "heroku-logger": "^0.1.1",
-    "superagent": "^3.5.0"
+    "superagent": "^3.8.3"
   },
   "devDependencies": {
     "@dosomething/eslint-config": "^4.0.0",
