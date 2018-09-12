@@ -4,7 +4,7 @@ const Slack = require('@slack/client');
 const Cacheman = require('cacheman');
 const logger = require('heroku-logger');
 
-const gambit = require('../../lib/gambit/admin');
+const gambit = require('../../lib/gambit');
 const helpers = require('../../lib/helpers');
 const northstar = require('../../lib/northstar');
 const slack = require('../../lib/slack');
