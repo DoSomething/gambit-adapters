@@ -78,15 +78,10 @@ function sendWebSignupsIndex(channel) {
  * @param {string} campaignId
  */
 module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
-  const payload = {
-    campaignId,
-    platform,
-  };
-
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then((user) => {
-      payload.northstarId = user.id;
-      return gambit.postSignupMessage(payload);
+      const userId = user.id;
+      return gambit.postSignupMessage(userId, campaignId);
     })
     .then((gambitRes) => {
       const data = gambitRes.body.data;
