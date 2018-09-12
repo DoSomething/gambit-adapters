@@ -131,7 +131,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   if (command === 'broadcast') {
     const broadcastId = message.broadcastId;
     if (!broadcastId) {
-      const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 2en018uiWcsMcIAWsGCQwS`';
+      const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 2en018uiWcsMcIAWsGCQwS';
       return rtm.sendMessage(errorMsg, channel);
     }
     return module.exports.sendBroadcast(channel, slackUserId, broadcastId);
