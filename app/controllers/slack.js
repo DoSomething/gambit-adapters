@@ -15,7 +15,6 @@ const rtm = new Slack.RtmClient(apiToken);
 const web = new Slack.WebClient(apiToken);
 const ttl = process.env.CACHE_TTL || 1440;
 const cache = new Cacheman({ ttl });
-const platform = 'gambit-slack';
 
 rtm.start();
 
@@ -55,16 +54,16 @@ function postErrorMessage(channel, error) {
 }
 
 /**
- * Posts Campaign List Message to given Slack channel for given environmentName.
+ * Posts list of campaigns that send web signup confirmations.
  * @param {String} channel
  * @return {Promise}
  */
-function sendWebSignupsIndex(channel) {
+function postWebSignupListMessage(channel) {
   rtm.sendTyping(channel);
 
   return gambit.get('campaigns')
-    .then((res) => {
-      const activeCampaigns = res.body.filter(campaign => campaign.status === 'active');
+    .then((gambitRes) => {
+      const activeCampaigns = gambitRes.body.filter(campaign => campaign.status === 'active');
       const attachments = activeCampaigns.map((campaign, index) => slack
         .parseCampaignAsAttachment(campaign, index));
       return web.chat.postMessage(channel, 'Current campaigns', { attachments });
@@ -79,13 +78,9 @@ function sendWebSignupsIndex(channel) {
  */
 module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
   return fetchNorthstarUserForSlackUserId(slackUserId)
-    .then((user) => {
-      const userId = user.id;
-      return gambit.postSignupMessage(userId, campaignId);
-    })
+    .then(user => gambit.postSignupMessage(user.id, campaignId))
     .then((gambitRes) => {
       const data = gambitRes.body.data;
-      logger.debug('gambit.postSignupMessage', { data });
       return rtm.sendMessage(data.messages[0].text, channel);
     })
     .catch(error => postErrorMessage(channel, error));
@@ -97,19 +92,10 @@ module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
  * @param {string} broadcastId
  */
 module.exports.postBroadcastMessage = function (channel, slackUserId, broadcastId) {
-  const payload = {
-    broadcastId,
-    platform,
-  };
-
   return fetchNorthstarUserForSlackUserId(slackUserId)
-    .then((user) => {
-      payload.northstarId = user.id;
-      return gambit.postBroadcastMessage(payload);
-    })
+    .then(user => gambit.postBroadcastMessage(user.id, broadcastId))
     .then((gambitRes) => {
       const data = gambitRes.body.data;
-      logger.debug('gambit.postBroadcastMessage', { data });
       const message = data.messages[0];
       const attachments = message.attachments.map((attachment) => {
         const url = attachment.url;
@@ -139,29 +125,20 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   const slackUserId = message.user;
 
   if (command === 'web') {
-    return sendWebSignupsIndex(channel);
+    return postWebSignupListMessage(channel);
   }
 
   if (command === 'broadcast') {
     const broadcastId = message.broadcastId;
     if (!broadcastId) {
-      const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 5mPrrJjImQAGYi4goYWk2S`';
+      const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 2en018uiWcsMcIAWsGCQwS`';
       return rtm.sendMessage(errorMsg, channel);
     }
     return module.exports.postBroadcastMessage(channel, slackUserId, broadcastId);
   }
 
-  const payload = {
-    messageId: message.ts,
-    text: message.text,
-    mediaUrl: message.mediaUrl,
-  };
-
   return fetchNorthstarUserForSlackUserId(slackUserId)
-    .then((northstarUser) => {
-      payload.userId = northstarUser.id;
-      return gambit.postMemberMessage(payload);
-    })
+    .then(user => gambit.postMemberMessage(user.id, message.text, message.mediaUrl))
     .then((gambitRes) => {
       const reply = gambitRes.body.data.messages.outbound[0];
       if (!reply.text) {
