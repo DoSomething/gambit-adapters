@@ -23,7 +23,7 @@ router.post('/', (req, res) => {
   const action = payload.actions[0];
 
   if (action.value === 'webSignup') {
-    return controller.postSignupMessage(channelId, userId, payload.callback_id);
+    return controller.sendSignup(channelId, userId, payload.callback_id);
   }
 
   logger.info('Unknown action', { action, userId, channelId });

@@ -58,7 +58,7 @@ function postErrorMessage(channel, error) {
  * @param {String} channel
  * @return {Promise}
  */
-function postWebSignupListMessage(channel) {
+function sendWebSignupList(channel) {
   rtm.sendTyping(channel);
 
   return gambit.get('campaigns')
@@ -76,7 +76,7 @@ function postWebSignupListMessage(channel) {
  * @param {string} slackUserId
  * @param {string} campaignId
  */
-module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
+module.exports.sendSignup = function (channel, slackUserId, campaignId) {
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then(user => gambit.postSignupMessage(user.id, campaignId))
     .then((gambitRes) => {
@@ -91,7 +91,7 @@ module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
  * @param {string} slackUserId
  * @param {string} broadcastId
  */
-module.exports.postBroadcastMessage = function (channel, slackUserId, broadcastId) {
+module.exports.sendBroadcast = function (channel, slackUserId, broadcastId) {
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then(user => gambit.postBroadcastMessage(user.id, broadcastId))
     .then((gambitRes) => {
@@ -125,7 +125,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
   const slackUserId = message.user;
 
   if (command === 'web') {
-    return postWebSignupListMessage(channel);
+    return sendWebSignupList(channel);
   }
 
   if (command === 'broadcast') {
@@ -134,7 +134,7 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
       const errorMsg = 'You need to pass a Broadcast Id. Example:\n\n> broadcast 2en018uiWcsMcIAWsGCQwS`';
       return rtm.sendMessage(errorMsg, channel);
     }
-    return module.exports.postBroadcastMessage(channel, slackUserId, broadcastId);
+    return module.exports.sendBroadcast(channel, slackUserId, broadcastId);
   }
 
   return fetchNorthstarUserForSlackUserId(slackUserId)
