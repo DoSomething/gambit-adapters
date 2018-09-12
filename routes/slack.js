@@ -13,7 +13,7 @@ const router = express.Router();
 router.post('/', (req, res) => {
   const payload = JSON.parse(req.body.payload);
 
-  if (payload.token !== process.env.SLACK_VERFICIATION_TOKEN) {
+  if (!slack.isValidToken(payload.token)) {
     return res.status(403).end('Access forbidden');
   }
   res.status(200).end();
