@@ -21,15 +21,13 @@ router.post('/', (req, res) => {
 
   const channelId = payload.channel.id;
   const userId = payload.user.id;
-  const data = slack.parseCallbackId(payload);
-  const campaignId = data.campaignId;
   const action = payload.actions[0];
 
   if (action.value === 'webSignup') {
-    return controller.postSignupMessage(channelId, userId, campaignId);
+    return controller.postSignupMessage(channelId, userId, payload.callback_id);
   }
 
-  logger.info('Unknown action', { action, campaignId, userId, channelId });
+  logger.info('Unknown action', { action, userId, channelId });
   return null;
 });
 
