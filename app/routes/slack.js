@@ -3,7 +3,6 @@
 const express = require('express');
 const logger = require('heroku-logger');
 const controller = require('../controllers/slack');
-const slack = require('../../lib/slack');
 
 const router = express.Router();
 
@@ -21,15 +20,13 @@ router.post('/', (req, res) => {
 
   const channelId = payload.channel.id;
   const userId = payload.user.id;
-  const data = slack.parseCallbackId(payload);
-  const campaignId = data.campaignId;
   const action = payload.actions[0];
 
-  if (action.value === 'external-signup') {
-    return controller.postSignupMessage(channelId, userId, campaignId);
+  if (action.value === 'webSignup') {
+    return controller.sendSignup(channelId, userId, payload.callback_id);
   }
 
-  logger.info('Unknown action', { action, campaignId, userId, channelId });
+  logger.info('Unknown action', { action, userId, channelId });
   return null;
 });
 
