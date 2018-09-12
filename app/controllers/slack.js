@@ -4,8 +4,7 @@ const Slack = require('@slack/client');
 const Cacheman = require('cacheman');
 const logger = require('heroku-logger');
 
-const gambitAdmin = require('../../lib/gambit/admin');
-const gambitConversations = require('../../lib/gambit/conversations');
+const gambit = require('../../lib/gambit/admin');
 const helpers = require('../../lib/helpers');
 const northstar = require('../../lib/northstar');
 const slack = require('../../lib/slack');
@@ -63,7 +62,7 @@ function postErrorMessage(channel, error) {
 function sendWebSignupsIndex(channel) {
   rtm.sendTyping(channel);
 
-  return gambitAdmin.get('campaigns')
+  return gambit.get('campaigns')
     .then((res) => {
       const activeCampaigns = res.body.filter(campaign => campaign.status === 'active');
       const attachments = activeCampaigns.map((campaign, index) => slack
@@ -87,11 +86,11 @@ module.exports.postSignupMessage = function (channel, slackUserId, campaignId) {
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then((user) => {
       payload.northstarId = user.id;
-      return gambitConversations.postSignupMessage(payload);
+      return gambit.postSignupMessage(payload);
     })
     .then((gambitRes) => {
       const data = gambitRes.body.data;
-      logger.debug('gambitConversations.postSignupMessage', { data });
+      logger.debug('gambit.postSignupMessage', { data });
       return rtm.sendMessage(data.messages[0].text, channel);
     })
     .catch(error => postErrorMessage(channel, error));
@@ -111,11 +110,11 @@ module.exports.postBroadcastMessage = function (channel, slackUserId, broadcastI
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then((user) => {
       payload.northstarId = user.id;
-      return gambitConversations.postBroadcastMessage(payload);
+      return gambit.postBroadcastMessage(payload);
     })
     .then((gambitRes) => {
       const data = gambitRes.body.data;
-      logger.debug('gambitConversations.postBroadcastMessage', { data });
+      logger.debug('gambit.postBroadcastMessage', { data });
       const message = data.messages[0];
       const attachments = message.attachments.map((attachment) => {
         const url = attachment.url;
@@ -165,8 +164,8 @@ rtm.on(Slack.RTM_EVENTS.MESSAGE, (message) => {
 
   return fetchNorthstarUserForSlackUserId(slackUserId)
     .then((northstarUser) => {
-      payload.northstarId = northstarUser.id;
-      return gambitConversations.postSlackMessage(payload);
+      payload.userId = northstarUser.id;
+      return gambit.postMemberMessage(payload);
     })
     .then((gambitRes) => {
       const reply = gambitRes.body.data.messages.outbound[0];

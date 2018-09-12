@@ -3,7 +3,6 @@
 const express = require('express');
 const logger = require('heroku-logger');
 const controller = require('../controllers/slack');
-const slack = require('../../lib/slack');
 
 const router = express.Router();
 
