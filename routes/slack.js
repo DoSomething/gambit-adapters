@@ -2,7 +2,7 @@
 
 const express = require('express');
 const logger = require('heroku-logger');
-const controller = require('../controllers/slack');
+const slack = require('../lib/slack');
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ const router = express.Router();
 router.post('/', (req, res) => {
   const payload = JSON.parse(req.body.payload);
 
-  if (payload.token !== process.env.SLACK_VERFICIATION_TOKEN) {
+  if (!slack.isValidToken(payload.token)) {
     return res.status(403).end('Access forbidden');
   }
   res.status(200).end();
@@ -23,7 +23,7 @@ router.post('/', (req, res) => {
   const action = payload.actions[0];
 
   if (action.value === 'webSignup') {
-    return controller.sendSignup(channelId, userId, payload.callback_id);
+    return slack.sendSignup(channelId, userId, payload.callback_id);
   }
 
   logger.info('Unknown action', { action, userId, channelId });

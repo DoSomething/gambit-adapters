@@ -9,7 +9,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-require('./app/routes')(app);
+require('./routes')(app);
 
 const WINSTON_LEVEL = process.env.LOGGING_LEVEL || 'info';
 
