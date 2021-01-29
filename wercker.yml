@@ -1,5 +1,0 @@
-box: node:8.11
-build:
-  steps:
-    - npm-install
-    - npm-test
