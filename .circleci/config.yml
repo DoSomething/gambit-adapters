@@ -1,0 +1,11 @@
+version: 2.1
+
+jobs:
+  # Install dependencies & run linting.
+  build:
+    docker:
+      - image: circleci/node:12.20
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run lint
