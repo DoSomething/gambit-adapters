@@ -1,32 +1,21 @@
-'use strict';
-
 require('dotenv').config();
 
-const express = require('express');
-const bodyParser = require('body-parser');
+const { App } = require('@slack/bolt');
+const logger = require('heroku-logger');
 
-const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-require('./lib/slack');
-require('./routes')(app);
-
-const WINSTON_LEVEL = process.env.LOGGING_LEVEL || 'info';
-
-const logger = require('winston');
-
-logger.configure({
-  transports: [
-    new logger.transports.Console({
-      prettyPrint: true,
-      colorize: true,
-      level: WINSTON_LEVEL,
-    }),
-  ],
+const app = new App({
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-const port = process.env.PORT || 4000;
-return app.listen(port, () => {
-  logger.info(`Gambit Slack is running on port=${port}.`);
+// Our Slack app is configured to listen for events that are DM messages to the bot. 
+app.message('', async ({ message, say }) => {
+  // say() sends a message to the channel where the event was triggered.
+  await say(`Hey there <@${message.user}>!`);
 });
+
+(async () => {
+  await app.start(process.env.PORT || 3000);
+
+  logger.info('⚡️ DS Bot is running! ⚡️');
+})();
