@@ -19,6 +19,25 @@ When a staff member directly messages the Gambit Slack app's bot user, the bot u
 
 Staff members may test over both SMS and Slack -- Gambit maintains a separate conversation topic for each platform.
 
+## Usage
+
+Send a direct message to the `@gambit-staging` bot user to begin a conversation with Gambit. It will execute relevant requests to our QA Northstar instance, updating your user (e.g. `sms_status`, `last_messaged_at`, voting plan fields) or creating new campaign activity.
+
+There are two Slack-specific differences to note:
+
+### Testing Broadcasts
+git
+Staff can test a specific broadcast over Slack by sending the bot user a `broadcast {broadcastId}` command, e.g. `broadcast 62TUEOJJXwMXTs6IQMGXaG`
+
+<img src="https://user-images.githubusercontent.com/1236811/106530558-6b70d100-64a1-11eb-9381-02ac4a2a3a8d.png" width="700" alt="Sending a broadcast command to the Slack bot user" />
+
+
+### Photo Posts
+
+If reporting back in a photo post topic, use the command `photo` in order to successfully send a photo when prompted. This app does not support using Slack file attachments to create a photo post (if we wanted to do that, it'd be best to move this code into Gambit itself vs. building support to send a raw file to the Gambit `POST /messages` API)
+
+<img src="https://user-images.githubusercontent.com/1236811/106530741-be4a8880-64a1-11eb-9db8-2f31d567fd57.png" width="700" alt="Sending a photo command to the Slack bot user" />
+
 ## Details
 
 This app requires a Slack app to be configured with the following settings:
