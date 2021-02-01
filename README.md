@@ -21,12 +21,12 @@ Staff members may test over both SMS and Slack -- Gambit maintains a separate co
 
 ## Usage
 
-Send a direct message to the `@gambit-staging` bot user to begin a conversation with Gambit. It will execute relevant requests to our QA Northstar instance, updating your user (e.g. `sms_status`, `last_messaged_at`, voting plan fields) or creating new campaign activity.
+Send a direct message to the `@gambit-staging` bot user to create or continue a Gambit conversation, and execute relevant requests to our QA Northstar instance to update your user (e.g. `sms_status`, `last_messaged_at`, voting plan fields) and/or create new campaign activity.
 
 There are two Slack-specific differences to note:
 
 ### Testing Broadcasts
-git
+
 Staff can test a specific broadcast over Slack by sending the bot user a `broadcast {broadcastId}` command, e.g. `broadcast 62TUEOJJXwMXTs6IQMGXaG`
 
 <img src="https://user-images.githubusercontent.com/1236811/106530558-6b70d100-64a1-11eb-9381-02ac4a2a3a8d.png" width="700" alt="Sending a broadcast command to the Slack bot user" />
