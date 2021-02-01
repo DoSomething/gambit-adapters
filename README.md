@@ -1,6 +1,6 @@
 # Gambit Slack
 
-Gambit Slack is a Slack app used internally by DoSomething.org staff, for testing our [SMS flows](https://github.com/dosomething/gambit-conversations) by direct messaging a Slack bot user.
+Gambit Slack is a Slack app used internally by DoSomething.org staff, for testing our [SMS flows](https://github.com/dosomething/gambit) by direct messaging a Slack bot user.
 
 Gambit Slack built with [Bolt for JavaScript](https://api.slack.com/tools/bolt).
 
@@ -8,15 +8,13 @@ Gambit Slack built with [Bolt for JavaScript](https://api.slack.com/tools/bolt).
 
 ## Overview
 
-When a staff member directly messages the Gambit Slack app's bot user, the bot user will respond with the relevant Gambit per the staff member's current Gambit conversation topic.
-
-When Gambit Slack app receives a direct message event from a staff member, it will:
+When a staff member directly messages the Gambit Slack app's bot user, the bot user responds with the relevant [Gambit reply](https://github.com/dosomething/gambit), via the following API requests:
 
 * Query the Slack API to find the email of the staff member who sent the DM to the bot.
 
-* Query the Northstar API to find the Northstar user ID associated with the email address
+* Query the [Northstar API](https://github.com/DoSomething/northstar/blob/master/documentation/endpoints/users.md#retrieve-a-user) to find the Northstar user ID associated with the email address
 
-* Post the staff member's user ID and the DM text to the Gambit API to determine the reply to send to the staff member
+* Post the staff member's user ID and the DM text to the [Gambit API](https://github.com/DoSomething/gambit/blob/main/documentation/endpoints/messages.md#custom) to determine the reply to send to the staff member
 
 * Post the Gambit reply to the Slack API to send a DM back to the staff member.
 
