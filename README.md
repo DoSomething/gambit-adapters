@@ -3,7 +3,7 @@
 Gambit Slack is a Slack app built with [Bolt for JavaScript](https://api.slack.com/tools/bolt) and used internally by DoSomething.org staff, for testing our [SMS flows](https://github.com/dosomething/gambit) by direct messaging a Slack bot user.
 
 
-<img src="https://user-images.githubusercontent.com/1236811/106520323-77549700-6491-11eb-80f0-8a8c80a1d249.png" alt="DM conversation with Gambit Slack bot user" />
+<img width="500" src="https://user-images.githubusercontent.com/1236811/106520323-77549700-6491-11eb-80f0-8a8c80a1d249.png" alt="DM conversation with Gambit Slack bot user" />
 
 ## Overview
 
@@ -21,11 +21,17 @@ Staff members may test over both SMS and Slack -- Gambit maintains a separate co
 
 ## Details
 
+This app requires a Slack app to be configured with the following settings:
+
+### Permissions
+
+The Gambit Slack app requires permissions to view a Slack user's email address, as well as the ability to read and create messages in Slack channels.
+
 ### Event Subscriptions
 
 The Gambit Slack app requires that Event Subscriptions enabled and subscribed to direct message events.
 
-<img src="https://user-images.githubusercontent.com/1236811/106339720-47688200-624c-11eb-845c-54772af8dbe3.png" />
+<img width="500" src="https://user-images.githubusercontent.com/1236811/106339720-47688200-624c-11eb-845c-54772af8dbe3.png" alt="Screenshot of Event Subscriptions configuration for Slack app"/>
 
 ### Bot Users
 
