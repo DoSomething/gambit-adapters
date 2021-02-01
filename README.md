@@ -23,7 +23,9 @@ Staff members may test over both SMS and Slack -- Gambit maintains a separate co
 
 ### Event Subscriptions
 
-The Gambit Slack app has Event Subscriptions enabled, and subscribes to direct message events.
+The Gambit Slack app requires that Event Subscriptions enabled and subscribed to direct message events.
+
+<img src="https://user-images.githubusercontent.com/1236811/106339720-47688200-624c-11eb-845c-54772af8dbe3.png" />
 
 ### Bot Users
 
