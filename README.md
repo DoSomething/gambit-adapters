@@ -3,7 +3,7 @@
 Gambit Slack is a Slack app built with [Bolt for JavaScript](https://api.slack.com/tools/bolt) and used internally by DoSomething.org staff, for testing our [SMS flows](https://github.com/dosomething/gambit) by direct messaging a Slack bot user.
 
 
-<img width="500" src="https://user-images.githubusercontent.com/1236811/106520323-77549700-6491-11eb-80f0-8a8c80a1d249.png" alt="DM conversation with Gambit Slack bot user" />
+<img width="700" src="https://user-images.githubusercontent.com/1236811/106520323-77549700-6491-11eb-80f0-8a8c80a1d249.png" alt="DM conversation with Gambit Slack bot user" />
 
 ## Overview
 
