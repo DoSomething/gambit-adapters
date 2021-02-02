@@ -19,7 +19,7 @@
     "dotenv": "^6.0.0",
     "eslint": "^4.19.1",
     "heroku-logger": "^0.1.1",
-    "superagent": "^3.8.3"
+    "superagent": "^6.1.0"
   },
   "devDependencies": {
     "@dosomething/eslint-config": "^4.0.0",
