@@ -3,26 +3,21 @@
   "version": "2.3.0",
   "description": "A Gambit Slack app",
   "engines": {
-    "node": "8.11.1",
-    "npm": "5.7.1"
+    "node": "12.x"
   },
-  "main": "index.js",
   "scripts": {
     "test": "npm run lint",
     "start": "node server",
-    "lint": "eslint --ext=.js index.js app lib"
+    "lint": "eslint --ext=.js ."
   },
   "author": "DoSomething.org",
   "license": "MIT",
   "dependencies": {
     "@dosomething/northstar-js": "git://github.com/DoSomething/northstar-js.git",
-    "@slack/client": "^3.10.0",
-    "bluebird": "^3.5.0",
-    "body-parser": "^1.17.2",
+    "@slack/bolt": "^3.1.1",
     "cacheman": "^2.2.1",
     "dotenv": "^6.0.0",
     "eslint": "^4.19.1",
-    "express": "^4.15.3",
     "heroku-logger": "^0.1.1",
     "superagent": "^3.8.3"
   },

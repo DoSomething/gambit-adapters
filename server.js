@@ -2,31 +2,19 @@
 
 require('dotenv').config();
 
-const express = require('express');
-const bodyParser = require('body-parser');
+const { App } = require('@slack/bolt');
+const logger = require('heroku-logger');
 
-const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const { reply } = require('./lib/slack');
+const config = require('./config/server');
 
-require('./lib/slack');
-require('./routes')(app);
+const app = new App(config.bolt);
 
-const WINSTON_LEVEL = process.env.LOGGING_LEVEL || 'info';
+// Our Slack app is configured to listen for events that are direct messages to our bot.
+app.message('', reply);
 
-const logger = require('winston');
+(async () => {
+  await app.start(config.port);
 
-logger.configure({
-  transports: [
-    new logger.transports.Console({
-      prettyPrint: true,
-      colorize: true,
-      level: WINSTON_LEVEL,
-    }),
-  ],
-});
-
-const port = process.env.PORT || 4000;
-return app.listen(port, () => {
-  logger.info(`Gambit Slack is running on port=${port}.`);
-});
+  logger.info('⚡️ DS Bot is running! ⚡️');
+})();
