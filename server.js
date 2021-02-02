@@ -1,3 +1,5 @@
+'use strict';
+
 require('dotenv').config();
 
 const { App } = require('@slack/bolt');
@@ -8,11 +10,8 @@ const config = require('./config/server');
 
 const app = new App(config.bolt);
 
-// Our Slack app is configured to listen for events that are direct messages to our bot. 
-app.message('', async ({ message, client }) => {
-  // Sends a message to the channel where the event was triggered.
-  await reply({ message, client });
-});
+// Our Slack app is configured to listen for events that are direct messages to our bot.
+app.message('', reply);
 
 (async () => {
   await app.start(config.port);
