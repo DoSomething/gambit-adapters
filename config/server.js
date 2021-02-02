@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
   bolt: {
     token: process.env.SLACK_BOT_TOKEN,
