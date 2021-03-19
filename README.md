@@ -31,7 +31,6 @@ Staff can test a specific broadcast over Slack by sending the bot user a `broadc
 
 <img src="https://user-images.githubusercontent.com/1236811/106530558-6b70d100-64a1-11eb-9381-02ac4a2a3a8d.png" width="700" alt="Sending a broadcast command to the Slack bot user" />
 
-
 ### Photo Posts
 
 If reporting back in a photo post topic, use the command `photo` in order to successfully send a photo when prompted. This app does not support using Slack file attachments to create a photo post (if we wanted to do that, it'd be best to move this code into Gambit itself vs. building support to send a raw file to the Gambit `POST /messages` API)
@@ -55,7 +54,6 @@ The Gambit Slack app requires that Event Subscriptions enabled and subscribed to
 ### Bot Users
 
 The Gambit Slack app's bot user name is `@gambit-staging`, because it executes API requests against the Gambit Staging instance.
-
 
 ## Installation
 
