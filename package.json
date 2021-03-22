@@ -13,7 +13,7 @@
   "author": "DoSomething.org",
   "license": "MIT",
   "dependencies": {
-    "@dosomething/gateway": "git://github.com/DoSomething/gateway-js.git#user-query",
+    "@dosomething/gateway": "^3.1.0",
     "@slack/bolt": "^3.1.1",
     "dotenv": "^6.0.0",
     "eslint": "^4.19.1",
