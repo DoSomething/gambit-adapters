@@ -8,12 +8,13 @@
   "scripts": {
     "test": "npm run lint",
     "start": "node server",
+    "dev": "nodemon server",
     "lint": "eslint --ext=.js ."
   },
   "author": "DoSomething.org",
   "license": "MIT",
   "dependencies": {
-    "@dosomething/gateway": "^3.0.0",
+    "@dosomething/gateway": "^3.1.0",
     "@slack/bolt": "^3.1.1",
     "dotenv": "^6.0.0",
     "eslint": "^4.19.1",
@@ -24,7 +25,8 @@
     "@dosomething/eslint-config": "^4.0.0",
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.7.0"
+    "eslint-plugin-react": "^7.7.0",
+    "nodemon": "^2.0.7"
   },
   "repository": {
     "type": "git",
